@@ -12,9 +12,11 @@ type JobsFilterBarProps = {
     source: string;
     jobType: string;
     minScore: string;
+    recommended: string;
   };
   totalJobs: number;
   filteredJobs: number;
+  hasCareerProfile: boolean;
 };
 
 const scoreOptions = [
@@ -30,12 +32,14 @@ export default function JobsFilterBar({
   current,
   totalJobs,
   filteredJobs,
+  hasCareerProfile,
 }: JobsFilterBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState(current.q);
   const [source, setSource] = useState(current.source);
   const [jobType, setJobType] = useState(current.jobType);
   const [minScore, setMinScore] = useState(current.minScore);
+  const [recommended, setRecommended] = useState(current.recommended);
 
   const activeCount = useMemo(() => {
     return [
@@ -43,8 +47,9 @@ export default function JobsFilterBar({
       source !== "all" ? source : "",
       jobType !== "all" ? jobType : "",
       minScore !== "0" ? minScore : "",
+      recommended === "1" ? recommended : "",
     ].filter(Boolean).length;
-  }, [jobType, minScore, query, source]);
+  }, [jobType, minScore, query, recommended, source]);
 
   const applyFilters = () => {
     const params = new URLSearchParams();
@@ -53,6 +58,7 @@ export default function JobsFilterBar({
     if (source !== "all") params.set("source", source);
     if (jobType !== "all") params.set("jobType", jobType);
     if (minScore !== "0") params.set("minScore", minScore);
+    if (recommended === "1") params.set("recommended", recommended);
 
     router.push(`/dashboard/jobs${params.toString() ? `?${params.toString()}` : ""}`);
   };
@@ -62,6 +68,7 @@ export default function JobsFilterBar({
     setSource("all");
     setJobType("all");
     setMinScore("0");
+    setRecommended("0");
     router.push("/dashboard/jobs");
   };
 
@@ -128,6 +135,29 @@ export default function JobsFilterBar({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-bold text-navy">Rekomendasi personal</p>
+            <p className="mt-1 text-xs font-medium text-gray-500">
+              Filter job yang paling dekat dengan target role, skill, lokasi, dan mode kerja Anda.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={!hasCareerProfile}
+            onClick={() => setRecommended((currentValue) => currentValue === "1" ? "0" : "1")}
+            className={`min-w-40 rounded-lg border px-4 py-3 text-sm font-bold transition-all ${
+              recommended === "1"
+                ? "border-primary bg-primary text-cream"
+                : "border-gray-300 bg-white text-navy hover:border-primary/50"
+            } disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            {recommended === "1" ? "Aktif" : "Sesuai Profile"}
+          </button>
         </div>
       </div>
 

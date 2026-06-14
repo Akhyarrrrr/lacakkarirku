@@ -1,6 +1,7 @@
 import { getGroqClient } from "@/lib/ai";
 import { asExperienceArray, asStringArray } from "@/lib/cv-types";
 import { db } from "@/lib/db";
+import { readMatchBreakdown } from "@/lib/match-breakdown";
 import { cvData, jobs, matches } from "@/lib/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
@@ -27,12 +28,6 @@ function normalizeAISuggestions(value: unknown): AISuggestions {
       ? data.match_analysis
       : "Analisis belum tersedia.",
   };
-}
-
-function getMatchedSkills(value: unknown) {
-  const breakdown = Boolean(value) && typeof value === "object" ? value as Record<string, unknown> : {};
-
-  return asStringArray(breakdown.matchedSkills);
 }
 
 export default async function SuggestionsPage({ searchParams }: SuggestionsPageProps) {
@@ -122,7 +117,7 @@ export default async function SuggestionsPage({ searchParams }: SuggestionsPageP
     };
   }
 
-  const matchedSkills = getMatchedSkills(match?.breakdown);
+  const matchedSkills = readMatchBreakdown(match?.breakdown).matchedSkills;
 
   return (
     <div className="space-y-10">

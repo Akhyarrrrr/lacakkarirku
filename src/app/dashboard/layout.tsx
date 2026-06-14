@@ -1,10 +1,12 @@
 import { UserButton } from "@clerk/nextjs";
-import { LayoutDashboard, Briefcase, FileText, Lightbulb } from "lucide-react";
+import { LayoutDashboard, Briefcase, FileText, Lightbulb, ClipboardList, UserRound } from "lucide-react";
 import Link from "next/link";
 
 const navLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Career Profile", href: "/dashboard/profile", icon: UserRound },
   { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
+  { name: "Applications", href: "/dashboard/applications", icon: ClipboardList },
   { name: "CV Saya", href: "/dashboard/cv", icon: FileText },
   { name: "Suggestions", href: "/dashboard/suggestions", icon: Lightbulb },
 ];

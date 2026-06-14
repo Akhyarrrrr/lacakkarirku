@@ -1,17 +1,36 @@
 import ScrapeButton from "@/components/ScrapeButton";
 import { db } from "@/lib/db";
-import { cvData, jobs, matches } from "@/lib/schema";
+import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
 import { currentUser } from "@clerk/nextjs/server";
-import { count, desc, gt } from "drizzle-orm";
-import { Briefcase, FileCheck, History, PlusCircle, Target } from "lucide-react";
+import { and, count, desc, eq, gt, ne } from "drizzle-orm";
+import { Briefcase, ClipboardList, FileCheck, History, PlusCircle, Target, UserRound } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
   const user = await currentUser();
 
   const [jobCount] = await db.select({ value: count() }).from(jobs);
-  const [cvCount] = await db.select({ value: count() }).from(cvData);
-  const [highMatchCount] = await db.select({ value: count() }).from(matches).where(gt(matches.matchScore, 80));
+  const currentCV = user?.id
+    ? await db.query.cvData.findFirst({ where: eq(cvData.userId, user.id) })
+    : null;
+  const careerProfile = user?.id
+    ? await db.query.careerProfiles.findFirst({ where: eq(careerProfiles.userId, user.id) })
+    : null;
+  const [applicationCount] = user?.id
+    ? await db.select({ value: count() }).from(applications).where(eq(applications.userId, user.id))
+    : [{ value: 0 }];
+  const [activeApplicationCount] = user?.id
+    ? await db.select({ value: count() }).from(applications).where(and(
+      eq(applications.userId, user.id),
+      ne(applications.status, "Archived"),
+    ))
+    : [{ value: 0 }];
+  const [highMatchCount] = currentCV
+    ? await db.select({ value: count() }).from(matches).where(and(
+      eq(matches.cvId, currentCV.id),
+      gt(matches.matchScore, 80),
+    ))
+    : [{ value: 0 }];
 
   const lastScrapedJob = await db.query.jobs.findFirst({
     orderBy: [desc(jobs.scrapedAt)],
@@ -25,7 +44,9 @@ export default async function DashboardPage() {
   const stats = [
     { label: "Total Jobs", value: jobCount.value.toString(), icon: Briefcase, color: "text-primary" },
     { label: "High Match (>80%)", value: highMatchCount.value.toString(), icon: Target, color: "text-success" },
-    { label: "CV Uploaded", value: cvCount.value > 0 ? "Yes" : "No", icon: FileCheck, color: "text-warning" },
+    { label: "CV Uploaded", value: currentCV ? "Yes" : "No", icon: FileCheck, color: "text-warning" },
+    { label: "Career Profile", value: careerProfile ? "Ready" : "Setup", icon: UserRound, color: "text-primary" },
+    { label: "Tracked Jobs", value: applicationCount.value.toString(), icon: ClipboardList, color: "text-primary" },
     {
       label: "Last Scraped",
       value: lastScrapedJob ? new Date(lastScrapedJob.scrapedAt!).toLocaleDateString() : "Never",
@@ -48,7 +69,24 @@ export default async function DashboardPage() {
         <ScrapeButton />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {!careerProfile && (
+        <section className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-navy">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="font-fraunces text-xl font-bold">Lengkapi Career Profile</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Isi target role, skill, dan preferensi kerja agar rekomendasi job lebih personal.
+              </p>
+            </div>
+            <Link href="/dashboard/profile" className="btn-primary inline-flex items-center justify-center gap-2">
+              <UserRound size={18} />
+              Setup Profile
+            </Link>
+          </div>
+        </section>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {stats.map((stat) => (
           <div key={stat.label} className="card flex items-center gap-4">
             <div className={`p-3 rounded-lg bg-gray-100 ${stat.color}`}>
@@ -106,10 +144,10 @@ export default async function DashboardPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold font-fraunces">
-              {cvCount.value > 0 ? "CV Sudah Terunggah" : "Unggah CV Anda"}
+              {currentCV ? "CV Sudah Terunggah" : "Unggah CV Anda"}
             </h3>
             <p className="text-gray-500 mt-2 max-w-xs">
-              {cvCount.value > 0
+              {currentCV
                 ? "Dapatkan skor kecocokan otomatis untuk setiap lowongan yang baru discrape."
                 : "Dapatkan analisis mendalam dan skor kecocokan otomatis untuk setiap lowongan."}
             </p>
@@ -118,8 +156,13 @@ export default async function DashboardPage() {
             href="/dashboard/cv"
             className="px-6 py-3 border-2 border-warning text-warning rounded-lg font-bold hover:bg-warning/5 transition-all text-center"
           >
-            {cvCount.value > 0 ? "Update CV" : "Upload CV Sekarang"}
+            {currentCV ? "Update CV" : "Upload CV Sekarang"}
           </Link>
+          {activeApplicationCount.value > 0 && (
+            <p className="text-xs font-semibold text-gray-500">
+              {activeApplicationCount.value} lamaran aktif sedang dilacak.
+            </p>
+          )}
         </div>
       </div>
     </div>

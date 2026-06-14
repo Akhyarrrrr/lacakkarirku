@@ -1,10 +1,12 @@
+import JobApplicationActions from "@/components/JobApplicationActions";
 import JobsFilterBar from "@/components/JobsFilterBar";
 import ManualJobForm from "@/components/ManualJobForm";
 import { db } from "@/lib/db";
-import { cvData, jobs, matches } from "@/lib/schema";
+import { calculateProfileFit } from "@/lib/profile-fit";
+import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, count, desc, eq, sql } from "drizzle-orm";
-import { Briefcase, Database, ExternalLink, MapPin, Target } from "lucide-react";
+import { Briefcase, Database, ExternalLink, Eye, MapPin, Target } from "lucide-react";
 import Link from "next/link";
 
 type JobsPageProps = {
@@ -13,6 +15,7 @@ type JobsPageProps = {
     source?: string;
     jobType?: string;
     minScore?: string;
+    recommended?: string;
   }>;
 };
 
@@ -45,6 +48,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const minScore = Number.parseInt(filters.minScore || "0", 10) || 0;
 
   const cv = await db.query.cvData.findFirst({ where: eq(cvData.userId, userId) });
+  const careerProfile = await db.query.careerProfiles.findFirst({ where: eq(careerProfiles.userId, userId) });
+  const recommendedOnly = filters.recommended === "1" && Boolean(careerProfile);
 
   const sourceCounts = await db.select({
     source: jobs.source,
@@ -63,9 +68,12 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       description: jobs.description,
       requirements: jobs.requirements,
       matchScore: matches.matchScore,
+      applicationId: applications.id,
+      applicationStatus: applications.status,
     })
       .from(jobs)
       .leftJoin(matches, and(eq(jobs.id, matches.jobId), eq(matches.cvId, cv.id)))
+      .leftJoin(applications, and(eq(jobs.id, applications.jobId), eq(applications.userId, userId)))
       .orderBy(desc(matches.matchScore), desc(jobs.scrapedAt))
     : await db.select({
       id: jobs.id,
@@ -78,8 +86,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       description: jobs.description,
       requirements: jobs.requirements,
       matchScore: sql<number | null>`null`,
+      applicationId: applications.id,
+      applicationStatus: applications.status,
     })
       .from(jobs)
+      .leftJoin(applications, and(eq(jobs.id, applications.jobId), eq(applications.userId, userId)))
       .orderBy(desc(jobs.scrapedAt));
 
   const sourceOptions = sourceCounts.map((source) => source.source).sort();
@@ -87,17 +98,32 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     new Set(allJobs.map((job) => job.jobType).filter((jobType): jobType is string => Boolean(jobType))),
   ).sort();
 
-  const filteredJobs = allJobs.filter((job) => {
+  const jobsWithProfileFit = allJobs
+    .map((job) => ({
+      ...job,
+      profileFit: calculateProfileFit(careerProfile, job),
+    }))
+    .sort((a, b) => {
+      if (recommendedOnly || careerProfile) {
+        return b.profileFit.score - a.profileFit.score || (b.matchScore || 0) - (a.matchScore || 0);
+      }
+
+      return 0;
+    });
+
+  const filteredJobs = jobsWithProfileFit.filter((job) => {
     const searchableText = `${job.title} ${job.company} ${job.description} ${job.requirements} ${job.location}`.toLowerCase();
     const matchesQuery = !query || searchableText.includes(query);
     const matchesSource = sourceFilter === "all" || job.source === sourceFilter;
     const matchesJobType = jobTypeFilter === "all" || job.jobType === jobTypeFilter;
     const matchesScore = !minScore || (job.matchScore || 0) >= minScore;
+    const matchesProfile = !recommendedOnly || job.profileFit.score >= 50;
 
-    return matchesQuery && matchesSource && matchesJobType && matchesScore;
+    return matchesQuery && matchesSource && matchesJobType && matchesScore && matchesProfile;
   });
 
   const highestMatch = Math.max(0, ...filteredJobs.map((job) => job.matchScore || 0));
+  const highestProfileFit = Math.max(0, ...filteredJobs.map((job) => job.profileFit.score));
 
   return (
     <div className="space-y-10">
@@ -120,10 +146,22 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           source: sourceFilter,
           jobType: jobTypeFilter,
           minScore: filters.minScore || "0",
+          recommended: filters.recommended || "0",
         }}
         totalJobs={allJobs.length}
         filteredJobs={filteredJobs.length}
+        hasCareerProfile={Boolean(careerProfile)}
       />
+
+      {!careerProfile && (
+        <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg flex items-center gap-3 text-navy">
+          <Target size={20} className="text-primary" />
+          <p className="text-sm font-medium">
+            Lengkapi Career Profile untuk mengaktifkan rekomendasi lowongan yang lebih personal.
+            <Link href="/dashboard/profile" className="ml-2 underline font-bold text-primary">Setup Profile</Link>
+          </p>
+        </div>
+      )}
 
       {!cv && (
         <div className="bg-warning/10 border border-warning/20 p-4 rounded-lg flex items-center gap-3 text-warning-700">
@@ -135,7 +173,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         </div>
       )}
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div className="card flex items-center gap-4">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <Briefcase size={22} />
@@ -163,6 +201,16 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           <div>
             <p className="text-sm text-gray-500 font-medium">Sumber Aktif</p>
             <p className="text-2xl font-bold text-navy">{sourceCounts.length}</p>
+          </div>
+        </div>
+
+        <div className="card flex items-center gap-4">
+          <div className="rounded-lg bg-primary/10 p-3 text-primary">
+            <Target size={22} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Profile Fit Tertinggi</p>
+            <p className="text-2xl font-bold text-navy">{highestProfileFit}%</p>
           </div>
         </div>
       </section>
@@ -221,9 +269,25 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold font-fraunces text-navy group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
-                    {job.title}
-                  </h3>
+                  {careerProfile && (
+                    <div className="mb-4 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Profile Fit</span>
+                        <span className="text-sm font-black text-primary">{job.profileFit.score}%</span>
+                      </div>
+                      {job.profileFit.matchedSignals.length > 0 && (
+                        <p className="mt-1 text-xs font-semibold text-gray-600">
+                          {job.profileFit.matchedSignals.slice(0, 2).join(" - ")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <Link href={`/dashboard/jobs/${job.id}`} className="block">
+                    <h3 className="text-xl font-bold font-fraunces text-navy group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+                      {job.title}
+                    </h3>
+                  </Link>
                   <p className="text-primary font-semibold mt-1">{job.company}</p>
 
                   <div className="mt-4 text-sm text-gray-600 line-clamp-4 min-h-[5rem] leading-relaxed">
@@ -244,22 +308,36 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                   </div>
                 </div>
 
-                <div className="mt-8 flex gap-3">
-                  <a
-                    href={job.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 btn-primary flex items-center justify-center gap-2 py-3"
-                  >
-                    Lamar Sekarang
-                    <ExternalLink size={16} />
-                  </a>
-                  <Link
-                    href={`/dashboard/suggestions?jobId=${job.id}`}
-                    className="px-4 py-3 bg-white border border-gray-200 rounded-lg text-navy font-bold hover:bg-gray-50 transition-all flex items-center gap-2"
-                  >
-                    Analisis AI
-                  </Link>
+                <div className="mt-8 space-y-3">
+                  <JobApplicationActions
+                    jobId={job.id}
+                    applicationStatus={job.applicationStatus}
+                  />
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <Link
+                      href={`/dashboard/jobs/${job.id}`}
+                      className="flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 font-bold text-primary transition-all hover:bg-primary/10"
+                    >
+                      Detail
+                      <Eye size={16} />
+                    </Link>
+                    <a
+                      href={job.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary flex items-center justify-center gap-2 py-3"
+                    >
+                      Lamar
+                      <ExternalLink size={16} />
+                    </a>
+                    <Link
+                      href={`/dashboard/suggestions?jobId=${job.id}`}
+                      className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 font-bold text-navy transition-all hover:bg-gray-50"
+                    >
+                      AI
+                    </Link>
+                  </div>
                 </div>
               </div>
             );

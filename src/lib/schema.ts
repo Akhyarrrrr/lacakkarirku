@@ -34,6 +34,23 @@ export const cvData = pgTable('cv_data', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const careerProfiles = pgTable('career_profiles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().unique(),
+  targetRole: text('target_role'),
+  targetLevel: text('target_level'),
+  preferredLocation: text('preferred_location'),
+  workModes: text('work_modes').array(),
+  salaryMin: integer('salary_min'),
+  salaryMax: integer('salary_max'),
+  currency: text('currency').default('IDR'),
+  skills: text('skills').array(),
+  industries: text('industries').array(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const matches = pgTable('matches', {
   id: uuid('id').primaryKey().defaultRandom(),
   jobId: uuid('job_id').notNull().references(() => jobs.id),
@@ -46,4 +63,22 @@ export const matches = pgTable('matches', {
   createdAt: timestamp('created_at').defaultNow(),
 }, (table) => [
   unique('unique_job_cv').on(table.jobId, table.cvId),
+]);
+
+export const applications = pgTable('applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  jobId: uuid('job_id').notNull().references(() => jobs.id),
+  cvId: uuid('cv_id').references(() => cvData.id),
+  status: text('status').notNull().default('Saved'),
+  notes: text('notes'),
+  contactName: text('contact_name'),
+  contactEmail: text('contact_email'),
+  appliedAt: timestamp('applied_at'),
+  followUpAt: timestamp('follow_up_at'),
+  lastStatusChangedAt: timestamp('last_status_changed_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => [
+  unique('unique_user_job_application').on(table.userId, table.jobId),
 ]);
