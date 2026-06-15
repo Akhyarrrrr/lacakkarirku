@@ -132,7 +132,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card space-y-8">
+    <form onSubmit={handleSubmit} className="card space-y-6 p-4 md:space-y-8 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 className="text-2xl font-bold font-fraunces text-navy">Career Profile</h2>
@@ -140,20 +140,20 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
             Isi target karier Anda agar job discovery, match score, dan saran AI punya konteks yang jelas.
           </p>
         </div>
-        <div className="rounded-lg bg-primary/5 px-4 py-3 text-center">
+        <div className="rounded-lg bg-primary/5 px-4 py-3 text-center md:min-w-40">
           <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Profile readiness</p>
           <p className="text-2xl font-black text-primary">{completionScore}%</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
         <label className="space-y-2">
           <span className="text-sm font-bold text-navy">Target role</span>
           <input
             required
             value={form.targetRole}
             onChange={(event) => updateField("targetRole", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="Frontend Developer, Fullstack Developer"
           />
         </label>
@@ -163,7 +163,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
           <select
             value={form.targetLevel}
             onChange={(event) => updateField("targetLevel", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
           >
             {levelOptions.map((level) => (
               <option key={level} value={level}>{level}</option>
@@ -176,7 +176,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
           <input
             value={form.preferredLocation}
             onChange={(event) => updateField("preferredLocation", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="Indonesia, Jakarta, Bandung, Remote global"
           />
         </label>
@@ -193,7 +193,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
                   type="button"
                   onClick={() => toggleWorkMode(mode)}
                   aria-pressed={selected}
-                  className={`rounded-full border px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                  className={`min-h-10 rounded-full border px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                     selected
                       ? "border-primary bg-primary text-cream"
                       : "border-gray-300 bg-white text-navy hover:border-primary/50"
@@ -212,7 +212,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
             inputMode="numeric"
             value={form.salaryMin}
             onChange={(event) => updateField("salaryMin", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="5000000"
           />
         </label>
@@ -223,7 +223,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
             inputMode="numeric"
             value={form.salaryMax}
             onChange={(event) => updateField("salaryMax", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="12000000"
           />
         </label>
@@ -233,7 +233,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
           <input
             value={form.skills}
             onChange={(event) => updateField("skills", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="React, Next.js, TypeScript, Tailwind, Node.js"
           />
           <span className="block text-xs font-medium text-gray-500">Pisahkan dengan koma.</span>
@@ -244,7 +244,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
           <input
             value={form.industries}
             onChange={(event) => updateField("industries", event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="SaaS, fintech, edtech, agency, remote startup"
           />
           <span className="block text-xs font-medium text-gray-500">Opsional, pisahkan dengan koma.</span>
@@ -255,7 +255,7 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
           <textarea
             value={form.notes}
             onChange={(event) => updateField("notes", event.target.value)}
-            className="input min-h-28 w-full resize-y"
+            className="input min-h-32 w-full resize-y focus:ring-2 focus:ring-primary"
             placeholder="Contoh: ingin fokus frontend React, terbuka freelance remote, hindari sales-heavy role."
           />
         </label>
@@ -272,11 +272,11 @@ export default function CareerProfileForm({ initialData }: CareerProfileFormProp
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-stretch md:justify-end">
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary flex min-w-44 items-center justify-center gap-2"
+          className="btn-primary flex min-h-11 w-full items-center justify-center gap-2 md:w-auto md:min-w-44"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : message ? <CheckCircle2 size={18} /> : <Save size={18} />}
           {loading ? "Menyimpan" : "Simpan Profile"}

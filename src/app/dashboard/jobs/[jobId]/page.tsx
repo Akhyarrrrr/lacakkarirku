@@ -43,7 +43,7 @@ function ScoreCard({
     <div className="rounded-lg border border-gray-100 bg-white p-4">
       <p className="text-xs font-bold uppercase tracking-wider text-gray-500">{label}</p>
       <div className="mt-3 flex items-end gap-1">
-        <span className={`text-4xl font-black ${color}`}>{value ?? 0}</span>
+        <span className={`text-3xl font-black md:text-4xl ${color}`}>{value ?? 0}</span>
         <span className="pb-1 text-sm font-bold text-gray-500">%</span>
       </div>
       <div className={`mt-3 h-2 overflow-hidden rounded-full ${bg}`}>
@@ -84,13 +84,13 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const requirements = job.requirements || "Requirements belum tersedia dari scraper. Anda tetap bisa memakai AI analysis jika deskripsi job cukup lengkap.";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <Link href="/dashboard/jobs" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 transition-all hover:text-primary">
         <ArrowLeft size={16} />
         Kembali ke Jobs
       </Link>
 
-      <section className="card">
+      <section className="card p-4 md:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -101,7 +101,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 {job.jobType || "Mode tidak disebutkan"}
               </span>
             </div>
-            <h1 className="mt-4 text-3xl font-bold font-fraunces text-navy">{job.title}</h1>
+            <h1 className="mt-4 text-2xl font-bold font-fraunces text-navy md:text-3xl">{job.title}</h1>
             <p className="mt-2 text-lg font-semibold text-primary">{job.company}</p>
             <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-gray-600">
               <span className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
@@ -127,23 +127,23 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         <main className="space-y-6 lg:col-span-2">
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Deskripsi Lowongan</h2>
             <div className="mt-4 whitespace-pre-line text-sm leading-7 text-gray-600">
               {description}
             </div>
           </section>
 
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Requirements</h2>
             <div className="mt-4 whitespace-pre-line text-sm leading-7 text-gray-600">
               {requirements}
             </div>
           </section>
 
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold font-fraunces text-navy">Match Breakdown</h2>
@@ -186,7 +186,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </main>
 
         <aside className="space-y-6">
-          <section className="card space-y-4">
+          <section className="card grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:block lg:space-y-4 lg:p-6">
             <ScoreCard
               label="CV Match"
               value={match?.matchScore ?? null}
@@ -200,7 +200,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             />
           </section>
 
-          <section className="card space-y-4">
+          <section className="card space-y-4 p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Tracker</h2>
             <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-600">
               Status: <span className="text-navy">{application?.status || "Belum dilacak"}</span>
@@ -214,7 +214,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             />
           </section>
 
-          <section className="card space-y-4">
+          <section className="card space-y-4 p-4 md:p-6">
             <h2 className="flex items-center gap-2 text-xl font-bold font-fraunces text-navy">
               <Lightbulb size={20} className="text-primary" />
               Next Best Action
@@ -224,7 +224,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </p>
             <Link
               href={`/dashboard/suggestions?jobId=${job.id}`}
-              className="inline-flex w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Buka AI Analysis
             </Link>

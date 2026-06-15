@@ -238,16 +238,16 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           {filteredJobs.map((job) => {
             const detailText = job.description || job.requirements;
             const sourceLogo = getSourceLogo(job.source);
 
             return (
-              <div key={job.id} className="card group hover:border-primary/50 transition-all flex flex-col justify-between">
+              <article key={job.id} className="card group flex flex-col justify-between transition-all hover:border-primary/50">
                 <div>
-                  <div className="flex justify-between items-start gap-3 mb-4">
-                    <div className="flex items-center gap-2">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-2">
                       <div
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-black"
                         style={{ backgroundColor: sourceLogo.bg, color: sourceLogo.color }}
@@ -258,19 +258,27 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                         Dari {job.source}
                       </span>
                     </div>
-                    {job.matchScore !== null && (
-                      <div className={`flex items-center gap-1 font-bold text-sm ${
-                        job.matchScore >= 80 ? "text-success" :
-                          job.matchScore >= 50 ? "text-warning" : "text-gray-400"
-                      }`}>
-                        <Target size={16} />
-                        {job.matchScore}% Match
-                      </div>
-                    )}
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      {job.matchScore !== null && (
+                        <div className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black ${
+                          job.matchScore >= 80 ? "bg-success/10 text-success" :
+                            job.matchScore >= 50 ? "bg-warning/10 text-warning" : "bg-gray-100 text-gray-500"
+                        }`}>
+                          <Target size={14} />
+                          {job.matchScore}% Match
+                        </div>
+                      )}
+                      {careerProfile && (
+                        <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-black text-primary">
+                          <Target size={14} />
+                          {job.profileFit.score}% Fit
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {careerProfile && (
-                    <div className="mb-4 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2">
+                    <div className="mb-4 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 sm:hidden">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Profile Fit</span>
                         <span className="text-sm font-black text-primary">{job.profileFit.score}%</span>
@@ -283,20 +291,23 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     </div>
                   )}
 
-                  <Link href={`/dashboard/jobs/${job.id}`} className="block">
-                    <h3 className="text-xl font-bold font-fraunces text-navy group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+                  <Link
+                    href={`/dashboard/jobs/${job.id}`}
+                    className="block rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  >
+                    <h3 className="line-clamp-2 min-h-0 text-lg font-bold font-fraunces text-navy transition-colors group-hover:text-primary md:min-h-[3.5rem] md:text-xl">
                       {job.title}
                     </h3>
                   </Link>
                   <p className="text-primary font-semibold mt-1">{job.company}</p>
 
-                  <div className="mt-4 text-sm text-gray-600 line-clamp-4 min-h-[5rem] leading-relaxed">
+                  <div className="mt-4 line-clamp-3 min-h-0 text-sm leading-relaxed text-gray-600 md:line-clamp-4 md:min-h-[5rem]">
                     {detailText
                       ? detailText
                       : "Deskripsi detail tidak tersedia untuk lowongan ini. Klik Lamar Sekarang untuk melihat informasi selengkapnya di situs asli."}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-500">
+                  <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-gray-500 md:mt-6">
                     <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded">
                       <MapPin size={14} className="text-primary" />
                       {job.location || "Remote"}
@@ -308,16 +319,16 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                   </div>
                 </div>
 
-                <div className="mt-8 space-y-3">
+                <div className="mt-6 space-y-3 md:mt-8">
                   <JobApplicationActions
                     jobId={job.id}
                     applicationStatus={job.applicationStatus}
                   />
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <Link
                       href={`/dashboard/jobs/${job.id}`}
-                      className="flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 font-bold text-primary transition-all hover:bg-primary/10"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:px-4 sm:text-base"
                     >
                       Detail
                       <Eye size={16} />
@@ -326,20 +337,20 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                       href={job.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-primary flex items-center justify-center gap-2 py-3"
+                      className="btn-primary flex min-h-11 items-center justify-center gap-2 px-3 py-3 text-sm sm:text-base"
                     >
                       Lamar
                       <ExternalLink size={16} />
                     </a>
                     <Link
                       href={`/dashboard/suggestions?jobId=${job.id}`}
-                      className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 font-bold text-navy transition-all hover:bg-gray-50"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-bold text-navy transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:px-4 sm:text-base"
                     >
                       AI
                     </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

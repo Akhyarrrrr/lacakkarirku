@@ -56,19 +56,19 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
   const profileFit = calculateProfileFit(careerProfile, job);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <Link href="/dashboard/applications" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 transition-all hover:text-primary">
         <ArrowLeft size={16} />
         Kembali ke Applications
       </Link>
 
-      <section className="card">
+      <section className="card p-4 md:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <span className="rounded-full bg-primary/5 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">
               {application.status}
             </span>
-            <h1 className="mt-4 text-3xl font-bold font-fraunces text-navy">{job.title}</h1>
+            <h1 className="mt-4 text-2xl font-bold font-fraunces text-navy md:text-3xl">{job.title}</h1>
             <p className="mt-2 text-lg font-semibold text-primary">{job.company}</p>
             <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-gray-600">
               <span className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
@@ -82,10 +82,10 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-col">
             <Link
               href={`/dashboard/jobs/${job.id}`}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Detail Job
               <FileText size={16} />
@@ -94,7 +94,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
               href={job.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center justify-center gap-2"
+              className="btn-primary inline-flex min-h-11 items-center justify-center gap-2"
             >
               Buka Lowongan
               <ExternalLink size={16} />
@@ -103,8 +103,8 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="card flex items-center gap-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <Target size={22} />
           </div>
@@ -113,7 +113,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             <p className="text-2xl font-bold text-navy">{match?.matchScore ?? 0}%</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-success/10 p-3 text-success">
             <Target size={22} />
           </div>
@@ -122,27 +122,27 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             <p className="text-2xl font-bold text-navy">{careerProfile ? profileFit.score : 0}%</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-warning/10 p-3 text-warning">
             <CalendarClock size={22} />
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Applied</p>
-            <p className="text-lg font-bold text-navy">{formatDate(application.appliedAt)}</p>
+            <p className="text-base font-bold text-navy md:text-lg">{formatDate(application.appliedAt)}</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <CalendarClock size={22} />
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Follow-up</p>
-            <p className="text-lg font-bold text-navy">{formatDate(application.followUpAt)}</p>
+            <p className="text-base font-bold text-navy md:text-lg">{formatDate(application.followUpAt)}</p>
           </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         <div className="lg:col-span-2">
           <ApplicationDetailForm
             application={{
@@ -158,7 +158,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
         </div>
 
         <aside className="space-y-6">
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Kontak</h2>
             <div className="mt-4 space-y-3 text-sm text-gray-600">
               <p>
@@ -172,14 +172,14 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             </div>
           </section>
 
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Next Step</h2>
             <p className="mt-3 text-sm leading-6 text-gray-600">
               Gunakan notes untuk mencatat sumber apply, follow-up, insight interview, atau versi CV yang dipakai.
             </p>
             <Link
               href={`/dashboard/suggestions?jobId=${job.id}`}
-              className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10"
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Buka AI Analysis
             </Link>

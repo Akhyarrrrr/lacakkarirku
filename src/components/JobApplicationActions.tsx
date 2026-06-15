@@ -59,6 +59,8 @@ export default function JobApplicationActions({
     || applicationStatus === "Assessment"
     || applicationStatus === "Interview"
     || applicationStatus === "Offer";
+  const savedLabel = applicationStatus || "Save";
+  const shortSavedLabel = savedLabel === "Assessment" ? "Assess" : savedLabel;
 
   return (
     <div className="space-y-2">
@@ -68,14 +70,14 @@ export default function JobApplicationActions({
           onClick={() => handleTrack("Saved")}
           disabled={loadingStatus !== null}
           aria-label={isSaved ? `Job sudah masuk tracker dengan status ${applicationStatus}` : "Simpan job ke tracker"}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+          className={`flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
             isSaved
               ? "border-primary/30 bg-primary/5 text-primary"
               : "border-gray-200 bg-white text-navy hover:border-primary/50 hover:bg-primary/5"
           }`}
         >
           {loadingStatus === "Saved" ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} />}
-          {isSaved ? applicationStatus : "Save"}
+          <span className="truncate">{shortSavedLabel}</span>
         </button>
 
         <button
@@ -83,14 +85,14 @@ export default function JobApplicationActions({
           onClick={() => handleTrack("Applied")}
           disabled={loadingStatus !== null}
           aria-label={isApplied ? "Job sudah ditandai applied" : "Tandai job sebagai applied"}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 ${
+          className={`flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 ${
             isApplied
               ? "bg-success/10 text-success"
               : "bg-navy text-cream hover:bg-navy/90"
           }`}
         >
           {loadingStatus === "Applied" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-          {isApplied ? "Applied" : "Mark Applied"}
+          <span className="truncate">{isApplied ? "Applied" : "Apply"}</span>
         </button>
       </div>
 

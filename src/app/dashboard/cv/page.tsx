@@ -17,9 +17,15 @@ export default async function CVPage() {
   const skills = asStringArray(currentCV?.skills);
   const experiences = asExperienceArray(currentCV?.experience);
   const education = asEducationArray(currentCV?.education);
+  const parsedAtLabel = currentCV?.parsedAt
+    ? new Intl.DateTimeFormat("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(currentCV.parsedAt))
+    : "Belum tersedia";
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 md:space-y-10">
       <div>
         <h1 className="text-3xl font-bold font-fraunces text-navy">Manajemen CV</h1>
         <p className="text-gray-600 mt-2">Kelola dan analisis CV Anda untuk pencocokan lowongan yang akurat.</p>
@@ -28,22 +34,22 @@ export default async function CVPage() {
       {!currentCV ? (
         <CVUploadForm />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-1 space-y-6">
             <CVUploadForm />
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="card">
+            <div className="card p-4 md:p-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
                 <h3 className="text-xl font-bold font-fraunces text-navy">Analisis Terakhir</h3>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <Calendar size={14} />
-                  Dianalisis pada {new Date(currentCV.parsedAt!).toLocaleDateString()}
+                  Dianalisis pada {parsedAtLabel}
                 </span>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                 <div>
                   <h4 className="flex items-center gap-2 font-bold text-navy mb-3">
                     <Award size={18} className="text-primary" />

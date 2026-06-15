@@ -82,11 +82,11 @@ export default function JobsFilterBar({
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex">
           <button
             type="button"
             onClick={resetFilters}
-            className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-bold text-navy hover:bg-gray-50 transition-all"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-bold text-navy transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             <RotateCcw size={18} />
             Reset
@@ -94,7 +94,7 @@ export default function JobsFilterBar({
           <button
             type="button"
             onClick={applyFilters}
-            className="btn-primary flex items-center justify-center gap-2"
+            className="btn-primary flex min-h-11 items-center justify-center gap-2"
           >
             <Filter size={18} />
             Terapkan
@@ -117,7 +117,7 @@ export default function JobsFilterBar({
 
       <div className="space-y-3">
         <p className="text-sm font-bold text-navy">Source</p>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {["all", ...sourceOptions].map((option) => {
             const selected = source === option;
             return (
@@ -125,7 +125,7 @@ export default function JobsFilterBar({
                 key={option}
                 type="button"
                 onClick={() => setSource(option)}
-                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition-all ${
+                className={`min-h-10 shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                   selected
                     ? "border-primary bg-primary text-cream"
                     : "border-gray-300 bg-white text-navy hover:border-primary/50"
@@ -150,7 +150,7 @@ export default function JobsFilterBar({
             type="button"
             disabled={!hasCareerProfile}
             onClick={() => setRecommended((currentValue) => currentValue === "1" ? "0" : "1")}
-            className={`min-w-40 rounded-lg border px-4 py-3 text-sm font-bold transition-all ${
+            className={`min-h-11 w-full rounded-lg border px-4 py-3 text-sm font-bold transition-all md:w-auto md:min-w-40 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
               recommended === "1"
                 ? "border-primary bg-primary text-cream"
                 : "border-gray-300 bg-white text-navy hover:border-primary/50"
@@ -172,7 +172,7 @@ export default function JobsFilterBar({
                   key={option}
                   type="button"
                   onClick={() => setJobType(option)}
-                  className={`rounded-full border px-4 py-2 text-sm font-bold transition-all ${
+                  className={`min-h-10 rounded-full border px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                     selected
                       ? "border-navy bg-navy text-cream"
                       : "border-gray-300 bg-white text-navy hover:border-navy/40"
@@ -187,7 +187,7 @@ export default function JobsFilterBar({
 
         <div className="space-y-3">
           <p className="text-sm font-bold text-navy">Minimum match</p>
-          <div className="grid grid-cols-4 overflow-hidden rounded-lg border border-gray-300 bg-white">
+          <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-gray-300 bg-white sm:grid-cols-4">
             {scoreOptions.map((option) => {
               const selected = minScore === option.value;
               return (
@@ -195,7 +195,7 @@ export default function JobsFilterBar({
                   key={option.value}
                   type="button"
                   onClick={() => setMinScore(option.value)}
-                  className={`px-3 py-3 text-sm font-bold transition-all ${
+                  className={`min-h-11 px-3 py-3 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-success focus:ring-inset ${
                     selected ? "bg-success text-cream" : "text-navy hover:bg-gray-50"
                   }`}
                 >

@@ -28,6 +28,7 @@ export async function parseCVWithAI(text: string, userId: string) {
     });
 
     const parsedData = normalizeParsedCV(JSON.parse(chatCompletion.choices[0].message.content || "{}"));
+    const now = new Date();
 
     await db.insert(cvData).values({
       userId,
@@ -37,7 +38,7 @@ export async function parseCVWithAI(text: string, userId: string) {
       education: parsedData.education,
       certifications: parsedData.certifications,
       keywords: parsedData.keywords,
-      parsedAt: new Date(),
+      parsedAt: now,
     }).onConflictDoUpdate({
       target: cvData.userId,
       set: {
@@ -47,7 +48,8 @@ export async function parseCVWithAI(text: string, userId: string) {
         education: parsedData.education,
         certifications: parsedData.certifications,
         keywords: parsedData.keywords,
-        updatedAt: new Date(),
+        parsedAt: now,
+        updatedAt: now,
       }
     });
 

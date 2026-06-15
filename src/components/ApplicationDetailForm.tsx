@@ -77,7 +77,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card space-y-6">
+    <form onSubmit={handleSubmit} className="card space-y-6 p-4 md:p-6">
       <div>
         <h2 className="text-xl font-bold font-fraunces text-navy">Detail Lamaran</h2>
         <p className="mt-1 text-sm text-gray-600">
@@ -91,7 +91,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value as ApplicationStatus)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
           >
             {APPLICATION_STATUSES.map((item) => (
               <option key={item} value={item}>{item}</option>
@@ -105,7 +105,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
             type="date"
             value={appliedAt}
             onChange={(event) => setAppliedAt(event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
           />
         </label>
 
@@ -115,7 +115,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
             type="date"
             value={followUpAt}
             onChange={(event) => setFollowUpAt(event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
           />
         </label>
 
@@ -124,7 +124,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
           <input
             value={contactName}
             onChange={(event) => setContactName(event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="Nama recruiter / hiring manager"
           />
         </label>
@@ -135,7 +135,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
             type="email"
             value={contactEmail}
             onChange={(event) => setContactEmail(event.target.value)}
-            className="input w-full"
+            className="input min-h-11 w-full focus:ring-2 focus:ring-primary"
             placeholder="recruiter@company.com"
           />
         </label>
@@ -145,7 +145,7 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
           <textarea
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            className="input min-h-40 w-full resize-y"
+            className="input min-h-40 w-full resize-y focus:ring-2 focus:ring-primary"
             placeholder="Contoh: Apply via LinkedIn, follow-up 5 hari lagi, highlight project portfolio React."
           />
         </label>
@@ -162,11 +162,11 @@ export default function ApplicationDetailForm({ application }: ApplicationDetail
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-stretch md:justify-end">
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary flex min-w-40 items-center justify-center gap-2"
+          className="btn-primary flex min-h-11 w-full items-center justify-center gap-2 md:w-auto md:min-w-40"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : message ? <CheckCircle2 size={18} /> : <Save size={18} />}
           {loading ? "Menyimpan" : "Simpan Detail"}

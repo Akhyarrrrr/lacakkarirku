@@ -63,7 +63,7 @@ export default function ApplicationStatusSelect({
           value={status}
           disabled={loading}
           onChange={(event) => handleChange(event.target.value as ApplicationStatus)}
-          className="input w-full appearance-none pr-10 text-sm font-bold"
+          className="input min-h-10 w-full appearance-none pr-10 text-sm font-bold focus:ring-2 focus:ring-primary disabled:cursor-wait disabled:opacity-70"
         >
           {APPLICATION_STATUSES.map((item) => (
             <option key={item} value={item}>{item}</option>
@@ -73,7 +73,7 @@ export default function ApplicationStatusSelect({
           <Loader2
             aria-hidden="true"
             size={16}
-            className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-primary"
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-primary"
           />
         )}
       </div>

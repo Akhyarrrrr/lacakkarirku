@@ -84,7 +84,7 @@ export default async function ApplicationsPage() {
   const offerCount = applicationRows.filter((item) => toApplicationStatus(item.status) === "Offer").length;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 md:space-y-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold font-fraunces text-navy">Application Tracker</h1>
@@ -92,14 +92,14 @@ export default async function ApplicationsPage() {
             Pantau semua lowongan yang Anda simpan, lamar, dan follow-up.
           </p>
         </div>
-        <Link href="/dashboard/jobs" className="btn-primary flex items-center justify-center gap-2">
+        <Link href="/dashboard/jobs" className="btn-primary flex min-h-11 items-center justify-center gap-2">
           <Briefcase size={18} />
           Cari Lowongan
         </Link>
       </div>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="card flex items-center gap-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <FileText size={22} />
           </div>
@@ -108,7 +108,7 @@ export default async function ApplicationsPage() {
             <p className="text-2xl font-bold text-navy">{applicationRows.length}</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-success/10 p-3 text-success">
             <Target size={22} />
           </div>
@@ -117,7 +117,7 @@ export default async function ApplicationsPage() {
             <p className="text-2xl font-bold text-navy">{activeCount}</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-warning/10 p-3 text-warning">
             <CalendarClock size={22} />
           </div>
@@ -126,7 +126,7 @@ export default async function ApplicationsPage() {
             <p className="text-2xl font-bold text-navy">{interviewCount}</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <Target size={22} />
           </div>
@@ -148,9 +148,9 @@ export default async function ApplicationsPage() {
           </Link>
         </section>
       ) : (
-        <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-5">
           {grouped.map(({ status, items }) => (
-            <div key={status} className="card space-y-4">
+            <div key={status} className="card space-y-4 p-4 md:p-6">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-fraunces text-xl font-bold text-navy">{status}</h2>
                 <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-bold text-gray-600">
@@ -169,26 +169,32 @@ export default async function ApplicationsPage() {
                     const followUpAt = formatDate(item.followUpAt);
 
                     return (
-                      <article key={item.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <article key={item.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-primary/30">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                           <div className="min-w-0">
-                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                              {item.job.source}
-                            </p>
-                            <h3 className="mt-1 line-clamp-2 font-fraunces text-lg font-bold text-navy">
-                              {item.job.title}
-                            </h3>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-gray-500">
+                                {item.job.source}
+                              </p>
+                              {item.matchScore !== null && (
+                                <div className="rounded-full bg-success/10 px-2.5 py-1 text-xs font-black text-success">
+                                  {item.matchScore}% Match
+                                </div>
+                              )}
+                            </div>
+                            <Link
+                              href={`/dashboard/applications/${item.id}`}
+                              className="mt-2 block rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            >
+                              <h3 className="line-clamp-2 font-fraunces text-lg font-bold text-navy transition-colors hover:text-primary">
+                                {item.job.title}
+                              </h3>
+                            </Link>
                             <p className="mt-1 text-sm font-semibold text-primary">{item.job.company}</p>
                             <p className="mt-2 text-xs font-medium text-gray-500">
                               {[item.job.location, item.job.jobType].filter(Boolean).join(" - ") || "Detail kerja belum lengkap"}
                             </p>
                           </div>
-
-                          {item.matchScore !== null && (
-                            <div className="shrink-0 rounded-lg bg-success/5 px-3 py-2 text-sm font-black text-success">
-                              {item.matchScore}% Match
-                            </div>
-                          )}
                         </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -196,46 +202,46 @@ export default async function ApplicationsPage() {
                             applicationId={item.id}
                             currentStatus={toApplicationStatus(item.status)}
                           />
-                          <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600">
-                            {appliedAt ? `Applied: ${appliedAt}` : "Belum ditandai applied"}
-                            {followUpAt ? <span className="block text-warning">Follow-up: {followUpAt}</span> : null}
+                          <div className="grid grid-cols-1 gap-2 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 sm:grid-cols-2 md:grid-cols-1">
+                            <span>{appliedAt ? `Applied: ${appliedAt}` : "Belum ditandai applied"}</span>
+                            {followUpAt ? <span className="text-warning">Follow-up: {followUpAt}</span> : <span>Follow-up belum diatur</span>}
                           </div>
                         </div>
 
                         {item.notes && (
-                          <p className="mt-3 rounded-lg bg-cream px-3 py-2 text-sm text-gray-600">
+                          <p className="mt-3 line-clamp-3 rounded-lg bg-cream px-3 py-2 text-sm text-gray-600">
                             {item.notes}
                           </p>
                         )}
 
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                           <Link
                             href={`/dashboard/applications/${item.id}`}
-                            className="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-bold text-primary transition-all hover:bg-primary/10"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                           >
-                            Edit Detail
+                            Edit
                             <Pencil size={14} />
                           </Link>
                           <Link
                             href={`/dashboard/jobs/${item.job.id}`}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-navy transition-all hover:border-primary/50 hover:text-primary"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-navy transition-all hover:border-primary/50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                           >
-                            Detail Job
+                            Detail
                           </Link>
                           <a
                             href={item.job.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-navy transition-all hover:border-primary/50 hover:text-primary"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-navy transition-all hover:border-primary/50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                           >
-                            Buka Job
+                            Buka
                             <ExternalLink size={14} />
                           </a>
                           <Link
                             href={`/dashboard/suggestions?jobId=${item.job.id}`}
-                            className="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-bold text-primary transition-all hover:bg-primary/10"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                           >
-                            Analisis AI
+                            AI
                           </Link>
                         </div>
                       </article>

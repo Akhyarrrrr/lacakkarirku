@@ -17,7 +17,7 @@ export default async function ProfilePage() {
   const skills = Array.isArray(profile?.skills) ? profile.skills : [];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 md:space-y-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold font-fraunces text-navy">Career Profile</h1>
@@ -27,8 +27,8 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="card flex items-center gap-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <Target size={22} />
           </div>
@@ -38,7 +38,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-success/10 p-3 text-success">
             <BriefcaseBusiness size={22} />
           </div>
@@ -48,7 +48,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-warning/10 p-3 text-warning">
             <MapPin size={22} />
           </div>
@@ -58,7 +58,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="card flex items-center gap-4">
+        <div className="card flex items-center gap-3 p-4 md:gap-4 md:p-6">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <SlidersHorizontal size={22} />
           </div>
@@ -69,7 +69,7 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         <div className="lg:col-span-2">
           <CareerProfileForm
             initialData={profile ? {
@@ -88,7 +88,7 @@ export default async function ProfilePage() {
         </div>
 
         <aside className="space-y-6">
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Kenapa ini penting?</h2>
             <div className="mt-5 space-y-4 text-sm text-gray-600">
               <p>
@@ -100,7 +100,7 @@ export default async function ProfilePage() {
             </div>
           </section>
 
-          <section className="card">
+          <section className="card p-4 md:p-6">
             <h2 className="text-xl font-bold font-fraunces text-navy">Skills target</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {skills.length > 0 ? skills.map((skill) => (

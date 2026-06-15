@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 
 type ScrapeResult = {
   source: string;
@@ -48,13 +48,21 @@ export default function ScrapeButton() {
   };
 
   return (
-    <button 
-      onClick={handleScrape}
-      disabled={loading}
-      className="btn-primary flex items-center gap-2"
-    >
-      <Play size={18} />
-      {loading ? 'Scraping...' : 'Jalankan Scraper'}
-    </button>
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleScrape}
+        disabled={loading}
+        className="btn-primary flex min-h-11 items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {loading ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} />}
+        {loading ? 'Mencari lowongan...' : 'Jalankan Scraper'}
+      </button>
+      {loading && (
+        <p role="status" aria-live="polite" className="text-sm font-semibold text-gray-600">
+          Mengambil data lowongan dan menghitung match dengan CV Anda.
+        </p>
+      )}
+    </div>
   );
 }
