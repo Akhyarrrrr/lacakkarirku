@@ -15,9 +15,16 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
+const logoPath = "/lacakkarirku_logo.png";
+
 export const metadata: Metadata = {
-  title: "LacakKarirku | Intelligent Job Tracking",
+  title: "LacakKarirku",
   description: "Track your job applications and optimize your CV with AI.",
+  icons: {
+    icon: [{ url: logoPath, type: "image/png" }],
+    shortcut: [logoPath],
+    apple: [{ url: logoPath, type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +35,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="id" className="h-full antialiased" suppressHydrationWarning>
-        <body className={`${fraunces.variable} ${inter.variable} min-h-full flex flex-col font-inter`} suppressHydrationWarning>
+        <body
+          className={`${fraunces.variable} ${inter.variable} min-h-full flex flex-col font-inter`}
+          suppressHydrationWarning
+        >
           {children}
         </body>
       </html>

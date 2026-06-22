@@ -11,6 +11,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const workflow = [
@@ -58,8 +59,16 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-navy text-cream">
       <header className="border-b border-cream/10">
         <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 md:px-6">
-          <Link href="/" className="text-xl font-black font-fraunces text-primary md:text-2xl">
-            LacakKarirku
+          <Link href="/" className="flex items-center gap-2 text-xl font-black font-fraunces text-primary md:text-2xl">
+            <Image
+              src="/lacakkarirku_logo.png"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="h-10 w-10 rounded-md object-cover"
+            />
+            <span>LacakKarirku</span>
           </Link>
           <div className="flex items-center gap-3">
             {userId ? (
@@ -253,7 +262,16 @@ export default async function LandingPage() {
 
       <footer className="border-t border-cream/10 px-5 py-8 text-gray-400 md:px-6">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm md:flex-row">
-          <div className="font-bold font-fraunces text-primary">LacakKarirku</div>
+          <div className="flex items-center gap-2 font-bold font-fraunces text-primary">
+            <Image
+              src="/lacakkarirku_logo.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-md object-cover"
+            />
+            <span>LacakKarirku</span>
+          </div>
           <p>(c) 2026 LacakKarirku. Built as an AI job tracking portfolio project.</p>
         </div>
       </footer>

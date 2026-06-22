@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -135,9 +136,16 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         <div>
           <Link
             href="/"
-            className="mb-10 block text-2xl font-bold font-fraunces text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy"
+            className="mb-10 flex items-center gap-3 text-2xl font-bold font-fraunces text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy"
           >
-            LacakKarirku
+            <Image
+              src="/lacakkarirku_logo.png"
+              alt=""
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-md object-cover"
+            />
+            <span>LacakKarirku</span>
           </Link>
           <NavItems />
         </div>
@@ -147,8 +155,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       <header className="sticky top-0 z-40 border-b border-gray-100 bg-cream/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <Link href="/" className="block text-lg font-bold font-fraunces text-primary">
-              LacakKarirku
+            <Link href="/" className="flex items-center gap-2 text-lg font-bold font-fraunces text-primary">
+              <Image
+                src="/lacakkarirku_logo.png"
+                alt=""
+                width={34}
+                height={34}
+                className="h-8 w-8 rounded-md object-cover"
+              />
+              <span>LacakKarirku</span>
             </Link>
             <p className="truncate text-xs font-semibold text-gray-500">{currentPage}</p>
           </div>
@@ -179,8 +194,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           >
             <div>
               <div className="mb-8 flex items-center justify-between gap-3">
-                <Link href="/" className="text-xl font-bold font-fraunces text-primary">
-                  LacakKarirku
+                <Link href="/" className="flex items-center gap-2 text-xl font-bold font-fraunces text-primary">
+                  <Image
+                    src="/lacakkarirku_logo.png"
+                    alt=""
+                    width={38}
+                    height={38}
+                    className="h-9 w-9 rounded-md object-cover"
+                  />
+                  <span>LacakKarirku</span>
                 </Link>
                 <button
                   type="button"
