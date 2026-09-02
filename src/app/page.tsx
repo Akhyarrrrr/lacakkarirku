@@ -4,10 +4,13 @@ import {
   ArrowRight,
   Bell,
   CheckCircle2,
+  Code2,
+  Database,
   FileSearch,
   KanbanSquare,
   Lightbulb,
   Search,
+  ShieldCheck,
   Sparkles,
   Target,
 } from "lucide-react";
@@ -47,9 +50,27 @@ const benefits = [
 ];
 
 const previewJobs = [
-  { role: "Frontend Developer", company: "Remote Startup", match: "86%", status: "Saved" },
-  { role: "Fullstack Engineer", company: "SaaS Company", match: "78%", status: "Applied" },
-  { role: "React Developer", company: "Product Team", match: "72%", status: "Interview" },
+  { role: "Frontend Developer", company: "NusaWorks (Demo)", match: "86%", status: "Saved" },
+  { role: "Full-Stack Engineer", company: "Kreasi Cloud (Demo)", match: "78%", status: "Applied" },
+  { role: "React Developer", company: "Ruang Produk (Demo)", match: "72%", status: "Interview" },
+];
+
+const architecture = [
+  {
+    title: "Application layer",
+    description: "Next.js App Router and TypeScript connect the landing page, authenticated workspace, and server routes.",
+    icon: Code2,
+  },
+  {
+    title: "Data and identity",
+    description: "Clerk scopes authenticated access while Neon Postgres and Drizzle store CV, job, match, and tracker data.",
+    icon: Database,
+  },
+  {
+    title: "Honest AI boundary",
+    description: "Parsing, matching suggestions, and generated advice support user review; they do not predict hiring decisions.",
+    icon: ShieldCheck,
+  },
 ];
 
 export default async function LandingPage() {
@@ -62,13 +83,13 @@ export default async function LandingPage() {
           <Link href="/" className="flex items-center gap-2 text-xl font-black font-fraunces text-primary md:text-2xl">
             <Image
               src="/lacakkarirku_logo.png"
-              alt=""
+              alt="LacakKarirku logo"
               width={40}
               height={40}
               priority
               className="h-10 w-10 rounded-md object-cover"
             />
-            <span>LacakKarirku</span>
+            <span className="hidden sm:inline">LacakKarirku</span>
           </Link>
           <div className="flex items-center gap-3">
             {userId ? (
@@ -98,7 +119,7 @@ export default async function LandingPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-bold text-primary">
               <Sparkles size={16} />
-              AI job tracker untuk cari kerja lebih terarah
+              AI-assisted job-search workspace
             </div>
             <h1 className="mt-6 max-w-4xl text-4xl font-black font-fraunces leading-tight text-cream md:text-6xl">
               Cari kerja jangan cuma kirim lamaran. Track, analisis, dan apply dengan strategi.
@@ -127,6 +148,15 @@ export default async function LandingPage() {
                   </SignInButton>
                 </>
               )}
+              <a
+                href="https://github.com/Akhyarrrrr/lacakkarirku"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cream/20 px-6 text-base font-bold text-cream transition-all hover:border-primary/60 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy"
+              >
+                <Code2 size={18} />
+                Source Code
+              </a>
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -143,7 +173,7 @@ export default async function LandingPage() {
             <div className="rounded-lg bg-cream p-4 text-navy md:p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-wider text-primary">Action Center</p>
+                  <p className="text-xs font-black uppercase tracking-wider text-primary">Action Center - Demo Data</p>
                   <h2 className="mt-1 text-xl font-bold font-fraunces">Hari ini harus ngapain?</h2>
                 </div>
                 <div className="rounded-lg bg-primary/10 p-3 text-primary">
@@ -232,6 +262,57 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        <section id="recruiter-walkthrough" className="bg-cream px-5 py-20 text-navy md:px-6">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wider text-primary">Recruiter walkthrough</p>
+                <h2 className="mt-3 text-3xl font-black font-fraunces md:text-5xl">
+                  One workflow, with clear technical boundaries.
+                </h2>
+              </div>
+              <p className="max-w-2xl text-base leading-7 text-gray-600 lg:justify-self-end">
+                Start with a PDF CV, aggregate or add a job, review the match and suggestions, then track the application and follow-up. Public screens use demo data; candidate records stay behind authentication.
+              </p>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+              {architecture.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <article key={item.title} className="card">
+                    <div className="w-fit rounded-lg bg-primary/10 p-3 text-primary">
+                      <Icon size={24} />
+                    </div>
+                    <h3 className="mt-5 text-xl font-bold font-fraunces text-navy">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-gray-600">{item.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="https://github.com/Akhyarrrrr/lacakkarirku"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6"
+              >
+                <Code2 size={18} />
+                Review the source
+              </a>
+              <Link
+                href="/dashboard"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-primary/40 px-6 font-bold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-cream"
+              >
+                Explore the workflow
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-navy px-5 py-16 text-center text-cream md:px-6">
           <div className="mx-auto max-w-3xl">
             <Lightbulb size={34} className="mx-auto text-primary" />
@@ -265,7 +346,7 @@ export default async function LandingPage() {
           <div className="flex items-center gap-2 font-bold font-fraunces text-primary">
             <Image
               src="/lacakkarirku_logo.png"
-              alt=""
+              alt="LacakKarirku logo"
               width={32}
               height={32}
               className="h-8 w-8 rounded-md object-cover"

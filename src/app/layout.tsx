@@ -18,8 +18,9 @@ const inter = Inter({
 const logoPath = "/lacakkarirku_logo.png";
 
 export const metadata: Metadata = {
-  title: "LacakKarirku",
-  description: "Track your job applications and optimize your CV with AI.",
+  title: "LacakKarirku - AI-Assisted Job Search Workspace",
+  description:
+    "Parse a PDF CV, aggregate jobs, review CV-job matches, track applications, and plan follow-ups in one workspace.",
   icons: {
     icon: [{ url: logoPath, type: "image/png" }],
     shortcut: [logoPath],

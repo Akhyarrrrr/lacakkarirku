@@ -1,95 +1,63 @@
 # LacakKarirku
 
-LacakKarirku adalah aplikasi web untuk membantu pencari kerja menemukan lowongan, menganalisis CV, menghitung kecocokan CV dengan job description, dan mendapatkan saran optimasi CV berbasis AI.
+LacakKarirku is an AI-assisted job-search workspace that turns a PDF resume and scattered job links into one reviewable application pipeline. It combines CV parsing, multi-source job aggregation, CV-to-job matching, application tracking, and follow-up planning.
 
-Fokus utama sistem ini adalah membuat proses cari kerja lebih terarah:
+## Recruiter Walkthrough
 
-1. Upload CV.
-2. Scrape atau tambah lowongan manual.
-3. Lihat sumber lowongan dan detail job.
-4. Hitung match score.
-5. Dapatkan saran AI untuk memperbaiki CV sebelum melamar.
+1. **Upload a text-based PDF CV** - the system extracts the document text and asks the AI parser for structured skills, experience, education, certifications, and keywords.
+2. **Build a job workspace** - import jobs from supported public sources or add a job manually when a source is unavailable.
+3. **Review the match** - compare the selected CV with a job description, inspect matched skills and gaps, then generate focused improvement suggestions.
+4. **Track the application** - move an opportunity through Saved, Applied, Assessment, Interview, Offer, or Rejected, with notes and follow-up dates.
+5. **Use the dashboard** - review counts, priorities, and upcoming actions without maintaining a separate spreadsheet.
 
-## Fitur Utama
+The public landing page contains demo data only. Authenticated records are scoped to the signed-in user and should not be used to expose a recruiter's or candidate's personal data.
 
-- Auth user dengan Clerk.
-- Upload CV PDF dan ekstraksi teks.
-- Parsing CV dengan AI untuk mengambil skills, pengalaman, pendidikan, sertifikasi, dan keywords.
-- Scraping lowongan dari beberapa sumber.
-- Tambah lowongan manual dari link apa pun.
-- Match score antara CV dan lowongan.
-- AI suggestions untuk optimasi CV per lowongan.
-- Dashboard statistik lowongan, CV, dan match.
-- Halaman Jobs dengan source badge, search, filter source, filter mode kerja, dan filter minimum match.
-- Vercel cron untuk menjalankan scraping otomatis harian.
+## Product Scope
 
-## Source Lowongan
+- Clerk authentication.
+- PDF text extraction and AI-assisted CV parsing.
+- Multi-source job aggregation plus manual job entry.
+- Heuristic CV-to-job match scoring and AI suggestions.
+- Search and filtering by source, work mode, and match score.
+- Application status, notes, dates, and follow-up tracking.
+- Career profile preferences for role, salary, location, remote work, and stack.
+- Daily scheduled aggregation through Vercel Cron.
 
-Scraper saat ini mendukung beberapa source:
+## Architecture
 
-- LinkedIn
-- WeWorkRemotely
-- RemoteOK
-- Glints
-- JobStreet
-- Upwork
-- Remotive
-- Arbeitnow
-- Jobicy
-
-Catatan: beberapa website seperti Glints dan JobStreet bisa memblokir request server dengan Cloudflare atau anti-bot. Karena itu sistem juga menyediakan source alternatif yang lebih stabil serta fitur tambah lowongan manual.
-
-Untuk Glints, ada dukungan opsional `GLINTS_COOKIE` jika ingin mencoba scraping memakai cookie browser yang sudah lolos challenge.
-
-## Tech Stack
-
-- Next.js App Router
-- React
-- TypeScript
-- Tailwind CSS
-- Clerk
-- Neon Postgres
-- Drizzle ORM
-- Groq AI
-- Axios
-- Cheerio
-- pdf-parse
-- pdfjs-dist
-- Vercel Cron
-
-## Struktur Penting
-
-```txt
-src/app
-  api/
-    cron/scrape       Cron scraping endpoint
-    cv/upload         Upload dan parse CV
-    jobs/manual       Tambah lowongan manual
-    scrape            Manual scrape endpoint
-  dashboard/
-    cv                Halaman manajemen CV
-    jobs              Halaman eksplorasi lowongan
-    suggestions       Halaman AI suggestions
-
-src/components
-  CVUploadForm.tsx
-  JobsFilterBar.tsx
-  ManualJobForm.tsx
-  ScrapeButton.tsx
-
-src/lib
-  ai.ts               Lazy Groq client
-  cv-parser.ts        Parsing CV dengan AI
-  db.ts               Lazy Neon/Drizzle client
-  matcher.ts          Match score CV vs job
-  pdf.ts              Ekstraksi teks PDF
-  schema.ts           Schema database
-  scrapers/           Semua scraper lowongan
+```text
+Next.js App Router + Clerk
+        |
+        +-- CV upload -> PDF extraction -> Groq structured parsing
+        +-- Job sources/manual import -> normalization -> Neon Postgres
+        +-- CV + job -> heuristic matcher -> AI suggestions
+        +-- Application tracker -> status, notes, dates, follow-up
 ```
 
-## Environment Variables
+- **Web:** Next.js, React, TypeScript, Tailwind CSS
+- **Auth:** Clerk
+- **Data:** Neon Postgres, Drizzle ORM
+- **AI and document processing:** Groq, `pdf-parse`, `pdfjs-dist`
+- **Aggregation:** Axios, Cheerio, scheduled Vercel function
 
-Buat file `.env` di root project.
+## Source Reliability and Responsible Use
+
+Source availability changes when public HTML, APIs, rate limits, or site terms change. LacakKarirku therefore describes this capability as **multi-source job aggregation**, not as a guaranteed fixed number of integrations.
+
+- Prefer public or documented feeds where available.
+- Keep manual job entry as the reliable fallback.
+- Treat HTML scrapers as adapters that require periodic verification.
+- Do not promote or enable a blocked source until its current behavior and terms have been reviewed.
+- Never place browser cookies or private account data in a public demo.
+
+## Local Setup
+
+```bash
+npm install
+npm run dev
+```
+
+Create `.env` in the project root:
 
 ```env
 DATABASE_URL=
@@ -97,139 +65,50 @@ GROQ_API_KEY=
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 
-# Opsional untuk proteksi endpoint cron
+# Optional protection for the scheduled endpoint
 CRON_SECRET=
-
-# Opsional untuk mencoba scrape Glints dengan cookie browser
-GLINTS_COOKIE=
 ```
 
-## Menjalankan Lokal
+Open `http://localhost:3000`.
 
-Install dependency:
-
-```bash
-npm install
-```
-
-Jalankan development server:
-
-```bash
-npm run dev
-```
-
-Buka:
-
-```txt
-http://localhost:3000
-```
-
-## Verifikasi
-
-Lint:
+## Verification
 
 ```bash
 npm run lint
-```
-
-Type-check:
-
-```bash
 npx tsc --noEmit
-```
-
-Build:
-
-```bash
 npm run build
 ```
 
-## Database
+## Key Paths
 
-Schema database ada di:
-
-```txt
-src/lib/schema.ts
+```text
+src/app/api/cv/upload       CV upload and parsing
+src/app/api/jobs/manual     Manual job entry
+src/app/api/scrape          Aggregation trigger
+src/app/api/cron/scrape     Scheduled aggregation
+src/app/dashboard           Authenticated workspace
+src/lib/cv-parser.ts        Structured CV parsing
+src/lib/matcher.ts          CV-to-job scoring
+src/lib/schema.ts           Drizzle schema
+src/lib/scrapers            Source adapters
 ```
 
-Migration awal ada di:
+## Known Limitations
 
-```txt
-drizzle/0000_wonderful_swordsman.sql
-```
+- Image-only PDFs require OCR and are not supported yet.
+- Match scores are decision support, not a hiring prediction.
+- AI suggestions can be incomplete and must be reviewed before a CV is changed.
+- Public-source aggregation can stop working when upstream sites change.
+- The recruiter demo must use isolated demo data; personal applications and CV contents are not portfolio content.
 
-Tabel utama:
+## Screenshots
 
-- `jobs`
-- `cv_data`
-- `matches`
+- `docs/screenshots/landing.png` - public product overview.
+- `docs/screenshots/recruiter-workflow.png` - safe recruiter-facing workflow view.
 
-## Alur Sistem
+## Next Focus
 
-### Upload CV
-
-1. User upload file PDF.
-2. Sistem mengekstrak teks PDF.
-3. Teks dikirim ke Groq untuk diparse menjadi data terstruktur.
-4. Data CV disimpan ke database.
-5. Sistem menghitung ulang match score terhadap lowongan yang tersedia.
-
-### Scraping Lowongan
-
-1. User klik tombol scraper atau Vercel cron berjalan.
-2. Sistem menjalankan semua scraper.
-3. Setiap lowongan disimpan ke tabel `jobs`.
-4. Duplicate dicegah berdasarkan kombinasi `link` dan `source`.
-5. Match score dihitung ulang.
-
-### Manual Job
-
-Jika source tertentu diblokir atau user menemukan lowongan dari Google/website lain, user bisa tambah manual:
-
-- title
-- company
-- link
-- location
-- job type
-- description
-- requirements
-
-Source akan ditebak dari domain link, misalnya LinkedIn, JobStreet, Glints, atau Manual.
-
-## Deployment
-
-Project ini siap dideploy ke Vercel.
-
-File cron:
-
-```txt
-vercel.json
-```
-
-Endpoint cron:
-
-```txt
-/api/cron/scrape
-```
-
-Jika `CRON_SECRET` diisi, cron request harus mengirim header:
-
-```txt
-Authorization: Bearer <CRON_SECRET>
-```
-
-## Catatan Limitasi
-
-- Scraping website publik bisa berubah sewaktu-waktu karena HTML, API, Cloudflare, atau anti-bot.
-- Glints dan JobStreet bisa terbuka di browser tetapi tetap menolak request dari server.
-- PDF hasil scan gambar belum didukung OCR. Sistem saat ini mengekstrak teks digital dari PDF.
-- Match score masih heuristic dan bisa ditingkatkan dengan embeddings atau AI scoring.
-
-## Roadmap
-
-- Application tracker: Saved, Applied, Interview, Offer, Rejected.
-- OCR untuk CV hasil scan.
-- AI cover letter per lowongan.
-- Career profile: target role, salary, lokasi, remote preference, tech stack.
-- Search API resmi untuk mencari lowongan dari Google secara lebih stabil.
-- Notifikasi daily job digest.
+- OCR for scanned resumes.
+- Stable documented job-source APIs where practical.
+- Safer isolated recruiter demo data.
+- Daily digest and optional cover-letter assistance after the core workflow is stable.
