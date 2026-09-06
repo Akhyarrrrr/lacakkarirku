@@ -5,16 +5,20 @@ import { scrapeAllSources, summarizeScrapeResults } from "@/lib/scrapers";
 export const dynamic = 'force-dynamic'; // prevent caching
 
 export async function GET(request: Request) {
-  // Optional: Add simple security check using a cron secret
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
-  
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+
+  if (!cronSecret) {
+    console.error("[CRON] CRON_SECRET is not configured");
+    return NextResponse.json({ error: "Cron is not configured" }, { status: 503 });
+  }
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    console.log("[CRON] Starting daily job scraping...");
+    console.log("[CRON] Starting weekly job scraping...");
     
     const results = await scrapeAllSources();
     const summary = summarizeScrapeResults(results);
