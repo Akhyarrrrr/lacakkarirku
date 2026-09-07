@@ -2,7 +2,7 @@ import ApplicationStatusSelect from "@/components/ApplicationStatusSelect";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/application-status";
 import { db } from "@/lib/db";
 import { applications, cvData, jobs, matches } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Briefcase, CalendarClock, ExternalLink, FileText, Pencil, Target } from "lucide-react";
 import Link from "next/link";

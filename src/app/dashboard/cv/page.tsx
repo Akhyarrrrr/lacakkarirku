@@ -2,17 +2,35 @@ import CVUploadForm from "@/components/CVUploadForm";
 import { asEducationArray, asExperienceArray, asStringArray } from "@/lib/cv-types";
 import { db } from "@/lib/db";
 import { cvData } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { Award, Briefcase, Calendar, GraduationCap } from "lucide-react";
 
 export default async function CVPage() {
   const { userId } = await auth();
   if (!userId) return null;
 
-  const currentCV = await db.query.cvData.findFirst({
+  const allCvs = await db.query.cvData.findMany({
     where: eq(cvData.userId, userId),
+    orderBy: [desc(cvData.isDefault), desc(cvData.updatedAt)],
   });
+  const currentCV = allCvs[0];
+
+  async function makeDefault(formData: FormData) {
+    "use server";
+    const { userId: actionUserId } = await auth();
+    const cvId = String(formData.get("cvId") || "");
+    if (!actionUserId || !cvId) return;
+    const owned = await db.query.cvData.findFirst({ where: eq(cvData.id, cvId) });
+    if (!owned || owned.userId !== actionUserId) return;
+    await db.transaction(async (tx) => {
+      await tx.update(cvData).set({ isDefault: false }).where(eq(cvData.userId, actionUserId));
+      await tx.update(cvData).set({ isDefault: true }).where(eq(cvData.id, cvId));
+    });
+    revalidatePath("/dashboard/cv");
+  }
 
   const skills = asStringArray(currentCV?.skills);
   const experiences = asExperienceArray(currentCV?.experience);
@@ -30,6 +48,24 @@ export default async function CVPage() {
         <h1 className="text-3xl font-bold font-fraunces text-navy">Manajemen CV</h1>
         <p className="text-gray-600 mt-2">Kelola dan analisis CV Anda untuk pencocokan lowongan yang akurat.</p>
       </div>
+
+      {allCvs.length > 0 && (
+        <section className="card">
+          <h2 className="text-xl font-bold font-fraunces text-navy">Versi CV</h2>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {allCvs.map((item) => (
+              <div key={item.id} className="rounded-lg border border-gray-200 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div><p className="font-bold text-navy">{item.name}</p><p className="text-sm text-gray-600">{item.targetRole || "Tanpa target role"}</p></div>
+                  {item.isDefault ? <span className="rounded-full bg-success/10 px-2 py-1 text-xs font-bold text-success">Default</span> : (
+                    <form action={makeDefault}><input type="hidden" name="cvId" value={item.id} /><button className="text-sm font-bold text-primary" type="submit">Jadikan default</button></form>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!currentCV ? (
         <CVUploadForm />

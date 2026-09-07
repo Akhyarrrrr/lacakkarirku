@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, eq } from "drizzle-orm";
 import { APPLICATION_STATUSES, getAppliedAtForStatus, isApplicationStatus } from "@/lib/application-status";
 import { db } from "@/lib/db";

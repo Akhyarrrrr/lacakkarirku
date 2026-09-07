@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { parseCVWithAI } from "@/lib/cv-parser";
 import { runBatchMatch } from "@/lib/matcher";
 import { extractPdfText } from "@/lib/pdf";
@@ -21,10 +21,16 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const name = String(formData.get("name") || "").trim();
+    const targetRole = String(formData.get("targetRole") || "").trim();
+    const makeDefault = formData.get("makeDefault") === "true";
 
     if (!file) {
       console.error("[CV Upload] No file found in form data");
       return NextResponse.json({ error: "File tidak ditemukan dalam unggahan." }, { status: 400 });
+    }
+    if (!name || name.length > 80 || targetRole.length > 120) {
+      return NextResponse.json({ error: "Nama CV wajib diisi dan panjang field tidak valid." }, { status: 400 });
     }
 
     console.log(`[CV Upload] File received: ${file.name}, Size: ${file.size}, Type: ${file.type}`);
@@ -66,7 +72,7 @@ export async function POST(request: Request) {
     console.log("[CV Upload] Sending text to AI for analysis...");
     let parsedData;
     try {
-      parsedData = await parseCVWithAI(text, userId);
+      parsedData = await parseCVWithAI(text, userId, name, targetRole, makeDefault);
       console.log("[CV Upload] AI Analysis complete");
     } catch (aiError: unknown) {
       console.error("[CV Upload] AI Analysis Error:", aiError);
@@ -79,7 +85,7 @@ export async function POST(request: Request) {
     // Batch matching
     try {
       console.log("[CV Upload] Starting batch match...");
-      await runBatchMatch(userId);
+      await runBatchMatch(userId, 100, parsedData.cvId);
       console.log("[CV Upload] Batch match complete");
     } catch (matchError) {
       console.warn("[CV Upload] Match calculation failed:", matchError);

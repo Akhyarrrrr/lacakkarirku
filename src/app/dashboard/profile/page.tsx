@@ -1,7 +1,7 @@
 import CareerProfileForm from "@/components/CareerProfileForm";
 import { db } from "@/lib/db";
 import { careerProfiles } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { eq } from "drizzle-orm";
 import { BriefcaseBusiness, MapPin, SlidersHorizontal, Target } from "lucide-react";
 

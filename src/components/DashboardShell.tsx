@@ -1,6 +1,6 @@
 'use client';
 
-import { UserButton, useUser } from "@clerk/nextjs";
+import { authClient } from '@/lib/auth-client'
 import {
   Briefcase,
   ClipboardList,
@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type DashboardShellProps = {
   children: React.ReactNode;
@@ -73,9 +73,9 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function AccountBlock() {
-  const { user } = useUser();
-  const displayName = user?.fullName || user?.username || "Akun Saya";
-  const email = user?.primaryEmailAddress?.emailAddress || "Kelola profil dan sesi";
+  const { data } = authClient.useSession();
+  const displayName = data?.user.name || "Akun Saya";
+  const email = data?.user.email || "Kelola profil dan sesi";
 
   return (
     <section
@@ -88,18 +88,10 @@ function AccountBlock() {
           <span className="mt-1 block truncate text-sm font-bold text-cream">{displayName}</span>
           <span className="mt-0.5 block truncate text-xs text-gray-500">{email}</span>
         </div>
-        <UserButton
-          userProfileMode="modal"
-          appearance={{
-            elements: {
-              userButtonTrigger: "rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy",
-              avatarBox: "h-11 w-11",
-            },
-          }}
-        />
+        <button type="button" onClick={() => authClient.signOut({ fetchOptions: { onSuccess: () => { window.location.href = '/' } } })} className="min-h-11 rounded-lg border border-white/10 px-3 text-sm font-bold text-cream hover:border-primary">Keluar</button>
       </div>
       <p className="rounded-lg bg-white/5 px-3 py-2 text-xs font-semibold text-gray-500">
-        Klik foto profil untuk pengaturan akun atau keluar.
+        Session diamankan dengan cookie HTTP-only.
       </p>
     </section>
   );
@@ -108,6 +100,8 @@ function AccountBlock() {
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const currentPage = useMemo(() => {
     return navLinks.find((link) => isActivePath(pathname, link.href))?.name || "Dashboard";
   }, [pathname]);
@@ -116,10 +110,19 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     if (!menuOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    const menuButton = menuButtonRef.current;
     document.body.style.overflow = "hidden";
+    const focusable = drawerRef.current?.querySelectorAll<HTMLElement>('a,button,[tabindex]:not([tabindex="-1"])');
+    focusable?.[0]?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Tab" && focusable?.length) {
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -127,6 +130,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      menuButton?.focus();
     };
   }, [menuOpen]);
 
@@ -168,6 +172,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             <p className="truncate text-xs font-semibold text-gray-500">{currentPage}</p>
           </div>
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setMenuOpen(true)}
             aria-label="Buka menu dashboard"
@@ -189,7 +194,11 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             onClick={() => setMenuOpen(false)}
           />
           <aside
+            ref={drawerRef}
             id="mobile-dashboard-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu dashboard"
             className="relative flex h-full w-[min(20rem,85vw)] flex-col justify-between bg-navy p-5 shadow-xl"
           >
             <div>

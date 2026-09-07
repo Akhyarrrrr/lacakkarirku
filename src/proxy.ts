@@ -1,17 +1,14 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { getSessionCookie } from 'better-auth/cookies'
+import { NextResponse, type NextRequest } from 'next/server'
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/cron/scrape',
-]);
+const publicPrefixes = ['/', '/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/api/auth', '/api/cron/scrape']
 
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
-  }
-});
+export default function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  const isPublic = path === '/' || publicPrefixes.slice(1).some((prefix) => path.startsWith(prefix))
+  if (!isPublic && !getSessionCookie(request)) return NextResponse.redirect(new URL('/sign-in', request.url))
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [

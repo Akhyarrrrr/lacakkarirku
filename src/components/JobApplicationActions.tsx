@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Bookmark, CheckCircle2, Loader2 } from "lucide-react";
+import { Bookmark, CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 
 type JobApplicationActionsProps = {
   jobId: string;
+  jobLink: string;
+  cvId?: string;
   applicationStatus?: string | null;
 };
 
@@ -14,13 +16,13 @@ type ApplicationResponse = {
   error?: string;
 };
 
-async function trackJob(jobId: string, status: "Saved" | "Applied") {
+async function trackJob(jobId: string, status: "Saved" | "Applied", cvId?: string) {
   const response = await fetch("/api/applications", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ jobId, status }),
+    body: JSON.stringify({ jobId, status, cvId }),
   });
 
   const data = await response.json() as ApplicationResponse;
@@ -34,6 +36,8 @@ async function trackJob(jobId: string, status: "Saved" | "Applied") {
 
 export default function JobApplicationActions({
   jobId,
+  jobLink,
+  cvId,
   applicationStatus,
 }: JobApplicationActionsProps) {
   const router = useRouter();
@@ -45,7 +49,7 @@ export default function JobApplicationActions({
     setLoadingStatus(status);
 
     try {
-      await trackJob(jobId, status);
+      await trackJob(jobId, status, cvId);
       router.refresh();
     } catch (trackError) {
       setError(trackError instanceof Error ? trackError.message : "Gagal memperbarui tracker.");
@@ -64,7 +68,15 @@ export default function JobApplicationActions({
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <a
+          href={jobLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-navy px-3 py-2 text-center text-sm font-bold text-cream focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
+          Buka lowongan &amp; lamar <ExternalLink size={16} />
+        </a>
         <button
           type="button"
           onClick={() => handleTrack("Saved")}
@@ -88,11 +100,11 @@ export default function JobApplicationActions({
           className={`flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 ${
             isApplied
               ? "bg-success/10 text-success"
-              : "bg-navy text-cream hover:bg-navy/90"
+              : "border border-success/30 bg-success/5 text-success hover:bg-success/10"
           }`}
         >
           {loadingStatus === "Applied" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-          <span className="truncate">{isApplied ? "Applied" : "Apply"}</span>
+          <span className="truncate">{isApplied ? "Sudah dilamar" : "Tandai sudah melamar"}</span>
         </button>
       </div>
 

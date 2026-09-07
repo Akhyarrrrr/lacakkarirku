@@ -3,7 +3,7 @@ import { asExperienceArray, asStringArray } from "@/lib/cv-types";
 import { db } from "@/lib/db";
 import { readMatchBreakdown } from "@/lib/match-breakdown";
 import { cvData, jobs, matches } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, eq } from "drizzle-orm";
 import { AlertCircle, ArrowLeft, CheckCircle, FileSearch, Lightbulb, Sparkles, Target } from "lucide-react";
 import Link from "next/link";

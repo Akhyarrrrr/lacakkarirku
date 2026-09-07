@@ -1,4 +1,50 @@
-import { pgTable, uuid, text, integer, jsonb, timestamp, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, jsonb, timestamp, unique, boolean, index } from 'drizzle-orm/pg-core';
+
+export const authUsers = pgTable('auth_users', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  image: text('image'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const authSessions = pgTable('auth_sessions', {
+  id: text('id').primaryKey(),
+  expiresAt: timestamp('expires_at').notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: text('user_id').notNull().references(() => authUsers.id, { onDelete: 'cascade' }),
+}, (table) => [index('auth_sessions_user_idx').on(table.userId)]);
+
+export const authAccounts = pgTable('auth_accounts', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: text('user_id').notNull().references(() => authUsers.id, { onDelete: 'cascade' }),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: timestamp('access_token_expires_at'),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [index('auth_accounts_user_idx').on(table.userId)]);
+
+export const authVerifications = pgTable('auth_verifications', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [index('auth_verifications_identifier_idx').on(table.identifier)]);
 
 export const jobs = pgTable('jobs', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -15,6 +61,10 @@ export const jobs = pgTable('jobs', {
   source: text('source').notNull(),
   scrapedAt: timestamp('scraped_at').defaultNow(),
   postedAt: timestamp('posted_at'),
+  lastCheckedAt: timestamp('last_checked_at').defaultNow(),
+  expiresAt: timestamp('expires_at'),
+  isActive: boolean('is_active').notNull().default(true),
+  sourceReliability: text('source_reliability').notNull().default('unverified'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (table) => [
@@ -23,7 +73,10 @@ export const jobs = pgTable('jobs', {
 
 export const cvData = pgTable('cv_data', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull().unique(),
+  userId: text('user_id').notNull(),
+  name: text('name').notNull().default('CV Utama'),
+  targetRole: text('target_role'),
+  isDefault: boolean('is_default').notNull().default(false),
   fullText: text('full_text').notNull(),
   skills: jsonb('skills'),
   experience: jsonb('experience'),

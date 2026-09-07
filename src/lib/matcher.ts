@@ -54,8 +54,10 @@ export async function calculateMatch(jobId: string, cvId: string) {
   return matchData;
 }
 
-export async function runBatchMatch(userId: string, limit = 100) {
-  const cv = await db.query.cvData.findFirst({ where: eq(cvData.userId, userId) });
+export async function runBatchMatch(userId: string, limit = 100, cvId?: string) {
+  const cv = cvId
+    ? await db.query.cvData.findFirst({ where: eq(cvData.id, cvId) })
+    : await db.query.cvData.findFirst({ where: eq(cvData.userId, userId), orderBy: [desc(cvData.isDefault), desc(cvData.updatedAt)] });
   if (!cv) return;
 
   const allJobs = await db.query.jobs.findMany({

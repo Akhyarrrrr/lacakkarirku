@@ -103,8 +103,10 @@ export default function JobsFilterBar({
       </div>
 
       <div className="relative">
+        <label htmlFor="job-search" className="sr-only">Cari lowongan</label>
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
+          id="job-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {

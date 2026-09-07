@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, desc, eq } from "drizzle-orm";
 import { APPLICATION_STATUSES, getAppliedAtForStatus, isApplicationStatus } from "@/lib/application-status";
 import { db } from "@/lib/db";
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
   try {
     const body = await readJsonObject(request);
     const jobId = readString(body, "jobId");
+    const requestedCvId = readString(body, "cvId");
     const rawStatus = readString(body, "status") || "Saved";
 
     if (!jobId) {
@@ -67,9 +68,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lowongan tidak ditemukan." }, { status: 404 });
     }
 
-    const cv = await db.query.cvData.findFirst({
-      where: eq(cvData.userId, userId),
-    });
+    const cv = requestedCvId
+      ? await db.query.cvData.findFirst({ where: and(eq(cvData.id, requestedCvId), eq(cvData.userId, userId)) })
+      : await db.query.cvData.findFirst({ where: eq(cvData.userId, userId), orderBy: [desc(cvData.isDefault), desc(cvData.updatedAt)] });
 
     const existingApplication = await db.query.applications.findFirst({
       where: and(eq(applications.userId, userId), eq(applications.jobId, jobId)),

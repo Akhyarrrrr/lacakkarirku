@@ -3,7 +3,7 @@ import { readMatchBreakdown } from "@/lib/match-breakdown";
 import { db } from "@/lib/db";
 import { calculateProfileFit } from "@/lib/profile-fit";
 import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, eq } from "drizzle-orm";
 import { ArrowLeft, Briefcase, CheckCircle2, ExternalLink, Lightbulb, MapPin, Target } from "lucide-react";
 import Link from "next/link";
@@ -210,6 +210,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </div>
             <JobApplicationActions
               jobId={job.id}
+              jobLink={job.link}
+              cvId={cv?.id}
               applicationStatus={application?.status}
             />
           </section>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -18,6 +17,7 @@ const inter = Inter({
 const logoPath = "/lacakkarirku_logo.png";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.BETTER_AUTH_URL || 'https://lacakkarirku.akhyar.dev'),
   title: "LacakKarirku - AI-Assisted Job Search Workspace",
   description:
     "Parse a PDF CV, aggregate jobs, review CV-job matches, track applications, and plan follow-ups in one workspace.",
@@ -34,7 +34,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
       <html lang="id" className="h-full antialiased" suppressHydrationWarning>
         <body
           className={`${fraunces.variable} ${inter.variable} min-h-full flex flex-col font-inter`}
@@ -43,6 +42,5 @@ export default function RootLayout({
           {children}
         </body>
       </html>
-    </ClerkProvider>
   );
 }

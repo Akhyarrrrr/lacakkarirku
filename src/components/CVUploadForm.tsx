@@ -10,6 +10,9 @@ type UploadErrorResponse = {
 
 export default function CVUploadForm() {
   const [file, setFile] = useState<File | null>(null);
+  const [name, setName] = useState("CV Utama");
+  const [targetRole, setTargetRole] = useState("");
+  const [makeDefault, setMakeDefault] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const processingSteps = [
@@ -31,6 +34,9 @@ export default function CVUploadForm() {
     setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('name', name);
+    formData.append('targetRole', targetRole);
+    formData.append('makeDefault', String(makeDefault));
 
     try {
       const res = await fetch('/api/cv/upload', {
@@ -59,6 +65,18 @@ export default function CVUploadForm() {
       
       {!success ? (
         <form onSubmit={handleSubmit} className="space-y-6">
+          <label className="block text-sm font-bold text-navy">
+            Nama versi CV
+            <input required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3" />
+          </label>
+          <label className="block text-sm font-bold text-navy">
+            Target role <span className="font-normal text-gray-600">(opsional)</span>
+            <input maxLength={120} value={targetRole} onChange={(event) => setTargetRole(event.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3" />
+          </label>
+          <label className="flex min-h-11 items-center gap-3 text-sm font-semibold text-navy">
+            <input type="checkbox" checked={makeDefault} onChange={(event) => setMakeDefault(event.target.checked)} />
+            Jadikan CV default
+          </label>
           <label className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center transition-all hover:bg-gray-100 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 md:p-10">
             <input 
               type="file" 

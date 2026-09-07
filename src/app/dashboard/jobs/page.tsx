@@ -4,9 +4,9 @@ import ManualJobForm from "@/components/ManualJobForm";
 import { db } from "@/lib/db";
 import { calculateProfileFit } from "@/lib/profile-fit";
 import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
-import { and, count, desc, eq, sql } from "drizzle-orm";
-import { Briefcase, Database, ExternalLink, Eye, MapPin, Target } from "lucide-react";
+import { auth } from "@/lib/auth-session";
+import { and, count, desc, eq, gte, ilike, or, sql } from "drizzle-orm";
+import { Briefcase, Database, Eye, MapPin, Target } from "lucide-react";
 import Link from "next/link";
 
 type JobsPageProps = {
@@ -16,6 +16,8 @@ type JobsPageProps = {
     jobType?: string;
     minScore?: string;
     recommended?: string;
+    cv?: string;
+    page?: string;
   }>;
 };
 
@@ -42,12 +44,13 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   if (!userId) return null;
 
   const filters = await searchParams;
-  const query = (filters.q || "").trim().toLowerCase();
+  const query = (filters.q || "").trim();
   const sourceFilter = filters.source || "all";
   const jobTypeFilter = filters.jobType || "all";
   const minScore = Number.parseInt(filters.minScore || "0", 10) || 0;
 
-  const cv = await db.query.cvData.findFirst({ where: eq(cvData.userId, userId) });
+  const userCvs = await db.query.cvData.findMany({ where: eq(cvData.userId, userId), orderBy: [desc(cvData.isDefault), desc(cvData.updatedAt)] });
+  const cv = userCvs.find((item) => item.id === filters.cv) || userCvs[0];
   const careerProfile = await db.query.careerProfiles.findFirst({ where: eq(careerProfiles.userId, userId) });
   const recommendedOnly = filters.recommended === "1" && Boolean(careerProfile);
 
@@ -55,6 +58,17 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     source: jobs.source,
     value: count(),
   }).from(jobs).groupBy(jobs.source);
+
+  const page = Math.max(1, Number.parseInt(filters.page || "1", 10) || 1);
+  const pageSize = 20;
+  const databaseFilters = [
+    query ? or(ilike(jobs.title, `%${query}%`), ilike(jobs.company, `%${query}%`), ilike(jobs.location, `%${query}%`)) : undefined,
+    sourceFilter !== "all" ? eq(jobs.source, sourceFilter) : undefined,
+    jobTypeFilter !== "all" ? eq(jobs.jobType, jobTypeFilter) : undefined,
+    eq(jobs.isActive, true),
+    cv && minScore ? gte(matches.matchScore, minScore) : undefined,
+  ].filter(Boolean);
+  const whereClause = and(...databaseFilters);
 
   const allJobs = cv
     ? await db.select({
@@ -70,11 +84,19 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       matchScore: matches.matchScore,
       applicationId: applications.id,
       applicationStatus: applications.status,
+      scrapedAt: jobs.scrapedAt,
+      lastCheckedAt: jobs.lastCheckedAt,
+      expiresAt: jobs.expiresAt,
+      isActive: jobs.isActive,
+      sourceReliability: jobs.sourceReliability,
     })
       .from(jobs)
       .leftJoin(matches, and(eq(jobs.id, matches.jobId), eq(matches.cvId, cv.id)))
       .leftJoin(applications, and(eq(jobs.id, applications.jobId), eq(applications.userId, userId)))
+      .where(whereClause)
       .orderBy(desc(matches.matchScore), desc(jobs.scrapedAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize)
     : await db.select({
       id: jobs.id,
       title: jobs.title,
@@ -88,15 +110,22 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       matchScore: sql<number | null>`null`,
       applicationId: applications.id,
       applicationStatus: applications.status,
+      scrapedAt: jobs.scrapedAt,
+      lastCheckedAt: jobs.lastCheckedAt,
+      expiresAt: jobs.expiresAt,
+      isActive: jobs.isActive,
+      sourceReliability: jobs.sourceReliability,
     })
       .from(jobs)
       .leftJoin(applications, and(eq(jobs.id, applications.jobId), eq(applications.userId, userId)))
-      .orderBy(desc(jobs.scrapedAt));
+      .where(whereClause)
+      .orderBy(desc(jobs.scrapedAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
 
   const sourceOptions = sourceCounts.map((source) => source.source).sort();
-  const jobTypeOptions = Array.from(
-    new Set(allJobs.map((job) => job.jobType).filter((jobType): jobType is string => Boolean(jobType))),
-  ).sort();
+  const jobTypeOptions = (await db.selectDistinct({ jobType: jobs.jobType }).from(jobs))
+    .map((row) => row.jobType).filter((value): value is string => Boolean(value)).sort();
 
   const jobsWithProfileFit = allJobs
     .map((job) => ({
@@ -112,14 +141,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     });
 
   const filteredJobs = jobsWithProfileFit.filter((job) => {
-    const searchableText = `${job.title} ${job.company} ${job.description} ${job.requirements} ${job.location}`.toLowerCase();
-    const matchesQuery = !query || searchableText.includes(query);
-    const matchesSource = sourceFilter === "all" || job.source === sourceFilter;
-    const matchesJobType = jobTypeFilter === "all" || job.jobType === jobTypeFilter;
-    const matchesScore = !minScore || (job.matchScore || 0) >= minScore;
     const matchesProfile = !recommendedOnly || job.profileFit.score >= 50;
-
-    return matchesQuery && matchesSource && matchesJobType && matchesScore && matchesProfile;
+    return matchesProfile;
   });
 
   const highestMatch = Math.max(0, ...filteredJobs.map((job) => job.matchScore || 0));
@@ -137,6 +160,18 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       </div>
 
       <ManualJobForm />
+
+      {userCvs.length > 1 && (
+        <form className="card flex items-end gap-3" method="get">
+          <label className="flex-1 text-sm font-bold text-navy">
+            CV untuk menghitung match
+            <select name="cv" defaultValue={cv?.id} className="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3">
+              {userCvs.map((item) => <option key={item.id} value={item.id}>{item.name}{item.targetRole ? ` — ${item.targetRole}` : ""}</option>)}
+            </select>
+          </label>
+          <button className="btn-primary min-h-11 px-4" type="submit">Gunakan CV</button>
+        </form>
+      )}
 
       <JobsFilterBar
         sourceOptions={sourceOptions}
@@ -316,16 +351,27 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                       <Briefcase size={14} className="text-primary" />
                       {job.jobType || "Full-time"}
                     </div>
+                    <div className="rounded bg-gray-50 px-2 py-1">
+                      Ditemukan {job.scrapedAt ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(job.scrapedAt) : "—"}
+                    </div>
+                    <div className="rounded bg-gray-50 px-2 py-1">
+                      Dicek {job.lastCheckedAt ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(job.lastCheckedAt) : "belum"} · {job.sourceReliability === "verified" ? "sumber terverifikasi" : "sumber belum diverifikasi"}
+                    </div>
                   </div>
+                  <p className="mt-3 text-xs leading-5 text-gray-600">
+                    <strong>CV Match</strong> menilai isi CV terpilih; <strong>Profile Fit</strong> menilai preferensi role, lokasi, dan cara kerja.
+                  </p>
                 </div>
 
                 <div className="mt-6 space-y-3 md:mt-8">
                   <JobApplicationActions
                     jobId={job.id}
+                    jobLink={job.link}
+                    cvId={cv?.id}
                     applicationStatus={job.applicationStatus}
                   />
 
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <Link
                       href={`/dashboard/jobs/${job.id}`}
                       className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:px-4 sm:text-base"
@@ -333,15 +379,6 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                       Detail
                       <Eye size={16} />
                     </Link>
-                    <a
-                      href={job.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary flex min-h-11 items-center justify-center gap-2 px-3 py-3 text-sm sm:text-base"
-                    >
-                      Lamar
-                      <ExternalLink size={16} />
-                    </a>
                     <Link
                       href={`/dashboard/suggestions?jobId=${job.id}`}
                       className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-bold text-navy transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:px-4 sm:text-base"
@@ -355,6 +392,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           })}
         </div>
       )}
+
+      <nav className="flex items-center justify-between" aria-label="Pagination lowongan">
+        {page > 1 ? <Link className="font-bold text-primary" href={{ query: { ...filters, page: page - 1 } }}>← Sebelumnya</Link> : <span />}
+        {allJobs.length === pageSize && <Link className="font-bold text-primary" href={{ query: { ...filters, page: page + 1 } }}>Berikutnya →</Link>}
+      </nav>
     </div>
   );
 }

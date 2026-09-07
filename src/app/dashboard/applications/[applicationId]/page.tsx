@@ -3,7 +3,7 @@ import { type ApplicationStatus, isApplicationStatus } from "@/lib/application-s
 import { db } from "@/lib/db";
 import { calculateProfileFit } from "@/lib/profile-fit";
 import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import { and, eq } from "drizzle-orm";
 import { ArrowLeft, Briefcase, CalendarClock, ExternalLink, FileText, MapPin, Target } from "lucide-react";
 import Link from "next/link";
@@ -177,6 +177,11 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             <p className="mt-3 text-sm leading-6 text-gray-600">
               Gunakan notes untuk mencatat sumber apply, follow-up, insight interview, atau versi CV yang dipakai.
             </p>
+            {application.followUpAt && (
+              <a href={`/api/applications/${application.id}/calendar`} className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-4 py-3 text-sm font-bold text-navy">
+                Ekspor follow-up ke kalender
+              </a>
+            )}
             <Link
               href={`/dashboard/suggestions?jobId=${job.id}`}
               className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"

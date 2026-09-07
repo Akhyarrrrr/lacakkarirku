@@ -3,7 +3,7 @@ import { APPLICATION_STATUSES, type ApplicationStatus, isApplicationStatus } fro
 import { db } from "@/lib/db";
 import { calculateProfileFit } from "@/lib/profile-fit";
 import { applications, careerProfiles, cvData, jobs, matches } from "@/lib/schema";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@/lib/auth-session";
 import { and, count, desc, eq, gt, ne, sql } from "drizzle-orm";
 import {
   ArrowRight,
@@ -245,7 +245,7 @@ export default async function DashboardPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-wider text-primary">Action Center</p>
             <h1 className="mt-2 text-3xl font-bold font-fraunces text-navy">
-              Halo, {user?.firstName || "Pejuang Karir"}.
+              Halo, {user?.name?.split(' ')[0] || "Pejuang Karir"}.
             </h1>
             <p className="mt-2 text-gray-600">
               Fokus hari ini: rapikan tracker, pilih job terbaik, dan follow-up lamaran yang sudah berjalan.

@@ -2,8 +2,9 @@ import { db } from "@/lib/db";
 import { cvData } from "@/lib/schema";
 import { getGroqClient } from "@/lib/ai";
 import { normalizeParsedCV } from "@/lib/cv-types";
+import { and, eq } from "drizzle-orm";
 
-export async function parseCVWithAI(text: string, userId: string) {
+export async function parseCVWithAI(text: string, userId: string, name: string, targetRole?: string, makeDefault = false) {
   const prompt = `
     Analyze the following CV text and extract information in JSON format.
     The output must strictly follow this structure:
@@ -30,8 +31,16 @@ export async function parseCVWithAI(text: string, userId: string) {
     const parsedData = normalizeParsedCV(JSON.parse(chatCompletion.choices[0].message.content || "{}"));
     const now = new Date();
 
-    await db.insert(cvData).values({
+    const existing = await db.query.cvData.findFirst({ where: eq(cvData.userId, userId) });
+    const shouldBeDefault = makeDefault || !existing;
+    if (shouldBeDefault) {
+      await db.update(cvData).set({ isDefault: false }).where(and(eq(cvData.userId, userId), eq(cvData.isDefault, true)));
+    }
+    const [created] = await db.insert(cvData).values({
       userId,
+      name,
+      targetRole: targetRole || null,
+      isDefault: shouldBeDefault,
       fullText: text,
       skills: parsedData.skills,
       experience: parsedData.experience,
@@ -39,21 +48,9 @@ export async function parseCVWithAI(text: string, userId: string) {
       certifications: parsedData.certifications,
       keywords: parsedData.keywords,
       parsedAt: now,
-    }).onConflictDoUpdate({
-      target: cvData.userId,
-      set: {
-        fullText: text,
-        skills: parsedData.skills,
-        experience: parsedData.experience,
-        education: parsedData.education,
-        certifications: parsedData.certifications,
-        keywords: parsedData.keywords,
-        parsedAt: now,
-        updatedAt: now,
-      }
-    });
+    }).returning({ id: cvData.id });
 
-    return parsedData;
+    return { ...parsedData, cvId: created.id };
   } catch (error) {
     console.error("AI Parsing Error:", error);
     throw error;

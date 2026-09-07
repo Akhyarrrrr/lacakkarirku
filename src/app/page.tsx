@@ -1,5 +1,4 @@
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-session";
 import {
   ArrowRight,
   Bell,
@@ -63,7 +62,7 @@ const architecture = [
   },
   {
     title: "Data and identity",
-    description: "Clerk scopes authenticated access while Neon Postgres and Drizzle store CV, job, match, and tracker data.",
+    description: "Secure email sessions scope access while Neon Postgres and Drizzle store CV, job, match, and tracker data.",
     icon: Database,
   },
   {
@@ -98,16 +97,12 @@ export default async function LandingPage() {
               </Link>
             ) : (
               <>
-                <SignInButton mode="modal" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
-                  <button className="min-h-10 rounded-lg px-3 font-semibold text-cream transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy">
+                <Link href="/sign-in" className="inline-flex min-h-10 items-center rounded-lg px-3 font-semibold text-cream transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy">
                     Masuk
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
-                  <button className="btn-primary min-h-10 px-4 py-2">
+                </Link>
+                <Link href="/sign-up" className="btn-primary inline-flex min-h-10 items-center px-4 py-2">
                     Daftar
-                  </button>
-                </SignUpButton>
+                </Link>
               </>
             )}
           </div>
@@ -135,17 +130,13 @@ export default async function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <SignUpButton mode="modal" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
-                    <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 text-base font-bold">
+                  <Link href="/sign-up" className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 text-base font-bold">
                       Mulai Gratis
                       <ArrowRight size={18} />
-                    </button>
-                  </SignUpButton>
-                  <SignInButton mode="modal" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
-                    <button className="inline-flex min-h-12 items-center justify-center rounded-lg border border-primary/40 px-6 text-base font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy">
+                  </Link>
+                  <Link href="/sign-in" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-primary/40 px-6 text-base font-bold text-primary transition-all hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-navy">
                       Masuk ke akun
-                    </button>
-                  </SignInButton>
+                  </Link>
                 </>
               )}
               <a
@@ -329,12 +320,10 @@ export default async function LandingPage() {
                   <ArrowRight size={18} />
                 </Link>
               ) : (
-                <SignUpButton mode="modal" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
-                  <button className="btn-primary inline-flex min-h-12 items-center gap-2 px-6 text-base font-bold">
+                <Link href="/sign-up" className="btn-primary inline-flex min-h-12 items-center gap-2 px-6 text-base font-bold">
                     Buat Akun Gratis
                     <ArrowRight size={18} />
-                  </button>
-                </SignUpButton>
+                </Link>
               )}
             </div>
           </div>

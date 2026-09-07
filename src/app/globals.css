@@ -10,7 +10,7 @@
   
   --color-gray-700: #2C3E50;
   --color-gray-600: #576B7F;
-  --color-gray-500: #8B96A5;
+  --color-gray-500: #657386;
   --color-gray-300: #D1D9E0;
   --color-gray-100: #E8EFF5;
 
@@ -28,7 +28,7 @@
   
   --gray-700: #2C3E50;
   --gray-600: #576B7F;
-  --gray-500: #8B96A5;
+  --gray-500: #657386;
   --gray-300: #D1D9E0;
   --gray-100: #E8EFF5;
 }
@@ -49,6 +49,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .card {
   @apply bg-cream border border-gray-100 rounded-xl p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md text-navy;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .input {
