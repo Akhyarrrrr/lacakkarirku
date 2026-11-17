@@ -1,14 +1,18 @@
+function matchesDomain(host: string, domain: string) {
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
 export function inferJobSource(link: string) {
   try {
-    const host = new URL(link).hostname.replace(/^www\./, "").toLowerCase();
+    const host = new URL(link).hostname.toLowerCase().replace(/^www\./, "").replace(/\.$/, "");
 
-    if (host.includes("linkedin.com")) return "LinkedIn";
-    if (host.includes("jobstreet.co.id")) return "JobStreet";
-    if (host.includes("glints.com")) return "Glints";
-    if (host.includes("upwork.com")) return "Upwork";
-    if (host.includes("remoteok.com")) return "RemoteOK";
-    if (host.includes("weworkremotely.com")) return "WeWorkRemotely";
-    if (host.includes("google.com")) return "Google";
+    if (matchesDomain(host, "linkedin.com")) return "LinkedIn";
+    if (matchesDomain(host, "jobstreet.co.id")) return "JobStreet";
+    if (matchesDomain(host, "glints.com")) return "Glints";
+    if (matchesDomain(host, "upwork.com")) return "Upwork";
+    if (matchesDomain(host, "remoteok.com")) return "RemoteOK";
+    if (matchesDomain(host, "weworkremotely.com")) return "WeWorkRemotely";
+    if (matchesDomain(host, "google.com")) return "Google";
 
     return host;
   } catch {
