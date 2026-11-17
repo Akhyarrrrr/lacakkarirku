@@ -2,6 +2,8 @@
 
 LacakKarirku is an AI-assisted job-search workspace that turns a PDF resume and scattered job links into one reviewable application pipeline. It combines CV parsing, multi-source job aggregation, CV-to-job matching, application tracking, and follow-up planning.
 
+[Open LacakKarirku](https://lacakkarirku.vercel.app/)
+
 ## Recruiter Walkthrough
 
 1. **Upload a text-based PDF CV** - the system extracts the document text and asks the AI parser for structured skills, experience, education, certifications, and keywords.
@@ -14,19 +16,19 @@ The public landing page contains demo data only. Authenticated records are scope
 
 ## Product Scope
 
-- Clerk authentication.
+- Email and password authentication with Better Auth and email verification.
 - PDF text extraction and AI-assisted CV parsing.
 - Multi-source job aggregation plus manual job entry.
 - Heuristic CV-to-job match scoring and AI suggestions.
 - Search and filtering by source, work mode, and match score.
 - Application status, notes, dates, and follow-up tracking.
 - Career profile preferences for role, salary, location, remote work, and stack.
-- Daily scheduled aggregation through Vercel Cron.
+- Weekly scheduled aggregation through Vercel Cron.
 
 ## Architecture
 
 ```text
-Next.js App Router + Clerk
+Next.js App Router + Better Auth
         |
         +-- CV upload -> PDF extraction -> Groq structured parsing
         +-- Job sources/manual import -> normalization -> Neon Postgres
@@ -35,7 +37,7 @@ Next.js App Router + Clerk
 ```
 
 - **Web:** Next.js, React, TypeScript, Tailwind CSS
-- **Auth:** Clerk
+- **Auth:** Better Auth with Resend for verification and password reset emails
 - **Data:** Neon Postgres, Drizzle ORM
 - **AI and document processing:** Groq, `pdf-parse`, `pdfjs-dist`
 - **Aggregation:** Axios, Cheerio, scheduled Vercel function
@@ -52,21 +54,31 @@ Source availability changes when public HTML, APIs, rate limits, or site terms c
 
 ## Local Setup
 
+Install the locked dependencies with Node.js 24.
+
 ```bash
-npm install
-npm run dev
+npm ci
 ```
 
-Create `.env` in the project root:
+Create a fresh development database in Neon and put its connection string in `.env.local`. Generate a value for `BETTER_AUTH_SECRET` with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`.
 
 ```env
 DATABASE_URL=
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=
+RESEND_API_KEY=
+EMAIL_FROM=
 GROQ_API_KEY=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-
-# Optional protection for the scheduled endpoint
 CRON_SECRET=
+```
+
+Set `EMAIL_FROM` to a sender on a domain verified in Resend. Signup and password reset require working email delivery. `GROQ_API_KEY` enables CV parsing and AI suggestions. Set `CRON_SECRET` if you use the scheduled aggregation endpoint.
+
+Initialize the **empty development database** with PostgreSQL's `psql` client. Replace `<development DATABASE_URL>` with its connection string. The last migration resets data tied to the former authentication system and can delete existing CVs, applications, and career profiles.
+
+```bash
+psql "<development DATABASE_URL>" -v ON_ERROR_STOP=1 --single-transaction -f drizzle/0000_wonderful_swordsman.sql -f drizzle/0001_career_application_tracker.sql -f drizzle/0002_product_trust.sql -f drizzle/0003_better_auth.sql
+npm run dev
 ```
 
 Open `http://localhost:3000`.
