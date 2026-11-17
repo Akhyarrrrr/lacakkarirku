@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { applications, jobs } from '@/lib/schema';
 
 function icsText(value: string) {
-  return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+  return value.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
 }
 
 function icsDate(value: Date) {
